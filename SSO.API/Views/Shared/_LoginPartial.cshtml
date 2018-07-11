@@ -1,0 +1,24 @@
+@using Microsoft.AspNetCore.Identity
+@using SSO.API.Models
+@using SSO.API.Models.AccountViewModels;
+@using SSO.DataAccess.Entities;
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+
+<div id="logoutForm" class="navbar-right hidden">
+    <ul class="nav navbar-nav navbar-right">
+        <li>
+            <a href="javascript:void(0)" title="Manage" id="username"></a>
+        </li>
+        <li>
+            <button type="submit" onclick="loginPartial.logout()" class="btn btn-link navbar-btn navbar-link">Log out</button>
+        </li>
+    </ul>
+</div>
+
+<ul class="nav navbar-nav navbar-right hidden" id="loginForm">
+    <li><a asp-area="" asp-controller="Account" asp-action="Register">Register</a></li>
+    <li><a asp-area="" asp-controller="Account" asp-action="Login">Log in</a></li>
+</ul>
+<script src="~/js/shared/login-partial.js"></script>

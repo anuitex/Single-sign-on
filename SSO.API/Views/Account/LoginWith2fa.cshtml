@@ -1,0 +1,36 @@
+﻿@model LoginWith2faViewModel
+@{
+    ViewData["Title"] = "Two-factor authentication";
+}
+
+<h2>@ViewData["Title"]</h2>
+<hr />
+<p>Your login is protected with an authenticator app. Enter your authenticator code below. We have sent code to your email</p>
+<div class="row">
+    <div class="col-md-4">
+        <div>
+            <input id="userId" name="userId" value="@Model.UserId" class="hidden" />
+            <input id="returnUrl" name="returnUrl" value="@Model.ReturnUrl" class="hidden" />
+            <div id="validation-errors"></div>
+            <div class="form-group">
+                <label for="twoFactorCode"></label>
+                <input id="twoFactorCode" name="twoFactorCode" class="form-control" autocomplete="off" />
+            </div>
+            <div class="form-group">
+                <div class="checkbox">
+                    <label for="RememberMachine">
+                        @Html.CheckBoxFor(m => m.RememberMachine)
+                        @Html.DisplayNameFor(m => m.RememberMachine)
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <button onclick="loginWith2faComponent.login()" type="submit" class="btn btn-default">Log in</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/account/login-with-2fa.js"></script>
+}

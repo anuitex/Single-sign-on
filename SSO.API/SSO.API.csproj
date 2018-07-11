@@ -1,0 +1,98 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net47</TargetFramework>
+    <UserSecretsId>aspnet-IdentityService-57E0ECD7-D5D9-42F2-BA78-1E88FC673B07</UserSecretsId>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageId>TemplateIdentityService</PackageId>
+    <Authors>Max Rudenko</Authors>
+    <Company>Anuitex</Company>
+    <Description>Auth API, asp.net core 2.0 identity/dapper/jwt authentication</Description>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <NeutralLanguage>en</NeutralLanguage>
+    <TypeScriptToolsVersion>2.6</TypeScriptToolsVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\js\account\forgot-password.js" />
+    <Content Remove="wwwroot\js\account\forgot-password.js.map" />
+    <Content Remove="wwwroot\js\account\forgot-password.ts" />
+    <Content Remove="wwwroot\js\account\login-with-2fa.js" />
+    <Content Remove="wwwroot\js\account\login-with-2fa.js.map" />
+    <Content Remove="wwwroot\js\account\login-with-2fa.ts" />
+    <Content Remove="wwwroot\js\account\Login.js" />
+    <Content Remove="wwwroot\js\account\Login.js.map" />
+    <Content Remove="wwwroot\js\account\Login.ts" />
+    <Content Remove="wwwroot\js\account\register.js" />
+    <Content Remove="wwwroot\js\account\register.js.map" />
+    <Content Remove="wwwroot\js\account\register.ts" />
+    <Content Remove="wwwroot\js\models\user-info.js" />
+    <Content Remove="wwwroot\js\models\user-info.js.map" />
+    <Content Remove="wwwroot\js\models\user-info.ts" />
+    <Content Remove="wwwroot\js\shared\login-partial.js" />
+    <Content Remove="wwwroot\js\shared\login-partial.js.map" />
+    <Content Remove="wwwroot\js\shared\login-partial.ts" />
+    <Content Remove="wwwroot\js\shared\Login.js" />
+    <Content Remove="wwwroot\js\shared\Login.js.map" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="1.50.4" />
+    <PackageReference Include="Dapper.Contrib" Version="1.50.4" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="2.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="2.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.ViewCompilation" Version="2.0.1" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.1" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.1" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="5.2.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.0.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.1" PrivateAssets="All" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="1.1.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.1" />
+    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0" />
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SSO.DataAccess\SSO.DataAccess.csproj" />
+    <ProjectReference Include="..\SSO.ViewModels\SSO.ViewModels.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="wwwroot\js\account\login-with-2fa.ts" />
+    <TypeScriptCompile Include="wwwroot\js\account\forgot-password.ts" />
+    <TypeScriptCompile Include="wwwroot\js\account\register.ts" />
+    <TypeScriptCompile Include="wwwroot\js\account\login.ts" />
+    <TypeScriptCompile Include="wwwroot\js\models\user-info.ts" />
+    <TypeScriptCompile Include="wwwroot\js\shared\login-partial.ts" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <TypeScriptTarget>ES5</TypeScriptTarget>
+    <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
+    <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
+    <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
+    <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
+    <TypeScriptRemoveComments>False</TypeScriptRemoveComments>
+    <TypeScriptOutFile />
+    <TypeScriptOutDir />
+    <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
+    <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
+    <TypeScriptSourceMap>True</TypeScriptSourceMap>
+    <TypeScriptMapRoot />
+    <TypeScriptSourceRoot />
+  </PropertyGroup>
+
+</Project>
