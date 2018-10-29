@@ -12,14 +12,13 @@ namespace SSO.Middleware
 {
     public class SSOMiddleware
     {
-        private readonly RequestDelegate next;
+        private readonly RequestDelegate _next;
         private readonly SSOOptions _options;
 
-        public SSOMiddleware(RequestDelegate next,
-            SSOOptions options)
+        public SSOMiddleware(RequestDelegate next, SSOOptions options)
         {
             _options = options;
-            this.next = next;
+            _next = next;
         }
 
         public async Task Invoke(HttpContext context)
@@ -51,7 +50,7 @@ namespace SSO.Middleware
 
             if (response == null || !response.IsSuccessStatusCode)
             {
-                await next(context);
+                await _next(context);
                 return;
             }
 

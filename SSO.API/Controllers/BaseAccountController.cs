@@ -36,7 +36,5 @@ namespace SSO.API.Controllers
             _signInManager = signInManager;
             _configuration = configuration;
         }
-
-      
     }
 }

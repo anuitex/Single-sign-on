@@ -48,7 +48,7 @@ namespace SSO.API.Controllers
         [HttpGet]
         public IActionResult Register(string returnUrl)
         {
-            if (String.IsNullOrEmpty(returnUrl))
+            if (string.IsNullOrEmpty(returnUrl))
             {
                 returnUrl = _configuration["RedirectUrl"];
             }
