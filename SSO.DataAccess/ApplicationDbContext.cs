@@ -8,6 +8,7 @@ namespace SSO.DataAccess
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
+
         }
     }
 }

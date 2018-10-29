@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Claims;
@@ -28,15 +29,17 @@ namespace SSO.Middleware
                 var returnUrl = context.Request.Query["returnUrl"];
                 var protocol = context.Request.IsHttps ? "https://" : "http://";
                 context.Response.Redirect(_options.Issuer + $"?returnUrl={protocol}{context.Request.Host}{returnUrl}");
+
                 return;
             }
 
             var token = context.Request.Query["token"];
             var redirectUrl = context.Request.Query["redirectUrl"];
 
-            if (string.IsNullOrEmpty(token))
+            if (String.IsNullOrEmpty(token))
             {
-                await _next(context);
+                await next(context);
+
                 return;
             }
 
@@ -51,12 +54,13 @@ namespace SSO.Middleware
                 return;
             }
 
-            TempUser user = JsonConvert.DeserializeObject<TempUser>(await response.Content.ReadAsStringAsync());
+            var user = JsonConvert.DeserializeObject<TempUser>(await response.Content.ReadAsStringAsync());
             var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
             identity.AddClaim(new Claim(ClaimTypes.Name, user.UserName));
             identity.AddClaim(new Claim("sso-token", ssoToken));
             await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
             context.Response.Redirect(redirectUrl.FirstOrDefault() ?? "");
+
             return;
         }
     }

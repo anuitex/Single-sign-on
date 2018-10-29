@@ -2,7 +2,7 @@
 
 namespace SSO.API.Controllers
 {
-    public class ErrorController: Controller
+    public class ErrorController : Controller
     {
         public IActionResult Index()
         {

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SSO.API.Services;
+using SSO.API.Services.Interfaces;
 using SSO.DataAccess.Entities;
 
 
@@ -14,8 +15,11 @@ namespace SSO.API.Controllers
         protected readonly IEmailSender _emailSender;
         protected readonly IConfiguration _configuration;
 
-        public BaseAccountController( UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
-                                      IEmailSender emailSender, IConfiguration configuration)
+        public BaseAccountController(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            IEmailSender emailSender,
+            IConfiguration configuration)
         {
             _emailSender = emailSender;
             _userManager = userManager;

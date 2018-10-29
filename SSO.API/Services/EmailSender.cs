@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using SSO.API.Services.Interfaces;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
@@ -13,6 +11,7 @@ namespace SSO.API.Services
     public class EmailSender : IEmailSender
     {
         private IConfiguration _configuration;
+
         public EmailSender(IConfiguration configuration)
         {
             _configuration = configuration;
@@ -25,6 +24,7 @@ namespace SSO.API.Services
             var from = _configuration["EmailAddress"];
             var password = _configuration["EmailPassword"];
             var client = new SmtpClient(smpt, port);
+
             client.UseDefaultCredentials = false;
             client.Credentials = new NetworkCredential(from, password);
             client.EnableSsl = true;
@@ -34,6 +34,7 @@ namespace SSO.API.Services
             mailMessage.To.Add(email);
             mailMessage.Body = message;
             mailMessage.Subject = subject;
+
             return client.SendMailAsync(mailMessage);
         }
     }

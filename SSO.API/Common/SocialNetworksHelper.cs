@@ -35,30 +35,24 @@ namespace SSO.API.Common
         public async Task<dynamic> GetFacebookDetails(dynamic value)
         {
             var webClient = new HttpClient();
-            string accessTokenUrl =
-                $"https://graph.facebook.com/v2.10/oauth/access_token?redirect_uri={value.redirectUri}&code={value.code}&client_id={_configuration["FacebookPublicKey"].ToString()}&client_secret={_configuration["FacebookSecretKey"].ToString()}";
+            var accessTokenUrl = $"https://graph.facebook.com/v2.10/oauth/access_token?redirect_uri={value.redirectUri}&code={value.code}&client_id={_configuration["FacebookPublicKey"].ToString()}&client_secret={_configuration["FacebookSecretKey"].ToString()}";
 
             string result = await webClient.GetStringAsync(accessTokenUrl);
             dynamic accessTokenResponse = JsonConvert.DeserializeObject(result);
 
-            dynamic profileUrl =
-                string.Format("https://graph.facebook.com/v2.10/me?fields=id,name,email,first_name,last_name,picture.type(large)&access_token={0}",
-                              accessTokenResponse.access_token);
-
             result = await webClient.GetStringAsync(profileUrl);
-
             var profileResponse = JsonConvert.DeserializeObject<dynamic>(result);
+
             return profileResponse;
         }
 
         public async Task<dynamic> GetFacebookDetailsByToken(string token)
         {
             var profileUrl = $"https://graph.facebook.com/v2.10/me?fields=id,name,email,first_name,last_name,picture.type(large)&access_token={token}";
-
             var webClient = new HttpClient();
             var result = await webClient.GetStringAsync(profileUrl);
-
             var profileResponse = JsonConvert.DeserializeObject<dynamic>(result);
+
             return profileResponse;
         }
 
@@ -67,8 +61,8 @@ namespace SSO.API.Common
             var url = $"https://graph.facebook.com/v2.10/{userId}/friends";
             var webClient = new HttpClient();
             var result = await webClient.GetStringAsync(url);
-
             var response = JsonConvert.DeserializeObject<dynamic>(result);
+
             return response;
         }
 
@@ -85,17 +79,13 @@ namespace SSO.API.Common
 
             var webClient = new HttpClient();
             HttpContent content = new FormUrlEncodedContent(postData);
-
             var tokenResponse = await webClient.PostAsync("https://www.googleapis.com/oauth2/v4/token", content);
-            dynamic accessTokenResponse =
-                JsonConvert.DeserializeObject<dynamic>(
-                    Encoding.ASCII.GetString(await tokenResponse.Content.ReadAsByteArrayAsync()));
+            dynamic accessTokenResponse = JsonConvert.DeserializeObject<dynamic>(Encoding.ASCII.GetString(await tokenResponse.Content.ReadAsByteArrayAsync()));
 
             var profileUrl = "https://www.googleapis.com/plus/v1/people/me";
             webClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessTokenResponse.access_token);
 
-            dynamic profileResponse =
-                JsonConvert.DeserializeObject<dynamic>(await webClient.GetStringAsync(profileUrl));
+            dynamic profileResponse = JsonConvert.DeserializeObject<dynamic>(await webClient.GetStringAsync(profileUrl));
             profileResponse.refresh_token = accessTokenResponse.refresh_token;
 
             //var youTubeChannelsUrl = "https://www.googleapis.com/youtube/v3/channels?part=statistics&mine=true";
@@ -116,9 +106,8 @@ namespace SSO.API.Common
             var webClient = new HttpClient();
             var profileUrl = "https://www.googleapis.com/plus/v1/people/me";
             webClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+            dynamic profileResponse = JsonConvert.DeserializeObject<dynamic>(await webClient.GetStringAsync(profileUrl));
 
-            dynamic profileResponse =
-                JsonConvert.DeserializeObject<dynamic>(await webClient.GetStringAsync(profileUrl));
             return profileResponse;
         }
 
@@ -126,11 +115,10 @@ namespace SSO.API.Common
         {
             var oauth_url = "https://api.twitter.com/oauth2/token";
             var headerFormat = "Basic {0}";
-            var authHeader = string.Format(headerFormat,
-                Convert.ToBase64String(
-                    Encoding.UTF8.GetBytes(Uri.EscapeDataString(_configuration["TwitterPublicKey"].ToString())
-                    + ":"
-                    + Uri.EscapeDataString((_configuration["TwitterSecretKey"].ToString())))));
+            var authHeader = string.Format(headerFormat, Convert.ToBase64String(
+                Encoding.UTF8.GetBytes(Uri.EscapeDataString(_configuration["TwitterPublicKey"].ToString())
+                + ":"
+                + Uri.EscapeDataString((_configuration["TwitterSecretKey"].ToString())))));
 
             var postBody = "grant_type=client_credentials";
 
@@ -148,6 +136,7 @@ namespace SSO.API.Common
 
             request.Headers.Add("Accept-Encoding", "gzip");
             WebResponse response = await request.GetResponseAsync();
+
             return response;
         }
 
@@ -155,6 +144,7 @@ namespace SSO.API.Common
         {
             var webClient = new HttpClient();
             var profileUrl = $"https://graph.facebook.com/{profileId}/picture?type=large";
+
             return await webClient.GetStringAsync(profileUrl);
         }
 

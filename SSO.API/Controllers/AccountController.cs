@@ -1,24 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 using SSO.API.Models;
 using SSO.API.Models.AccountViewModels;
-using SSO.API.Services;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Microsoft.Extensions.Configuration;
-using System.ComponentModel.DataAnnotations;
+using SSO.API.Services.Interfaces;
 using SSO.DataAccess.Entities;
+using System;
+using System.Threading.Tasks;
 
 namespace SSO.API.Controllers
 {
@@ -30,8 +19,11 @@ namespace SSO.API.Controllers
         private readonly IEmailSender _emailSender;
         private readonly IConfiguration _configuration;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
-                                 IEmailSender emailSender, IConfiguration configuration)
+        public AccountController(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            IEmailSender emailSender,
+            IConfiguration configuration)
         {
             _emailSender = emailSender;
             _userManager = userManager;
@@ -43,10 +35,12 @@ namespace SSO.API.Controllers
         public IActionResult Login(string returnUrl)
         {
             var view = new LoginAccountView();
-            if (string.IsNullOrEmpty(returnUrl))
+
+            if (String.IsNullOrEmpty(returnUrl))
             {
                 view.ReturnUrl = _configuration["RedirectUrl"];
             }
+
             ViewData["ReturnUrl"] = returnUrl;
             return View(view);
         }
@@ -58,8 +52,10 @@ namespace SSO.API.Controllers
             {
                 returnUrl = _configuration["RedirectUrl"];
             }
+
             var view = new RegisterAccountView();
             view.ReturnUrl = returnUrl;
+
             return View(view);
         }
 
@@ -70,16 +66,21 @@ namespace SSO.API.Controllers
             {
                 return Redirect("/Error/Index");
             }
+
             var user = await _userManager.FindByIdAsync(userId);
+
             if (user == null)
             {
                 return Redirect("/Error/Index");
             }
+
             var result = await _userManager.ConfirmEmailAsync(user, code);
+
             if (result.Succeeded)
             {
                 return View();
             }
+
             return Redirect("/Error/Index");
         }
 
@@ -96,7 +97,9 @@ namespace SSO.API.Controllers
             {
                 return Redirect("/Error/Index");
             }
+
             var model = new ResetPasswordViewModel { Code = code };
+
             return View(model);
         }
 
@@ -123,6 +126,7 @@ namespace SSO.API.Controllers
             }
 
             AddErrors(result);
+
             return View();
         }
 
@@ -160,6 +164,7 @@ namespace SSO.API.Controllers
             var model = new LoginWith2faViewModel();
             model.UserId = userId;
             model.ReturnUrl = returnUrl;
+
             return View(model);
         }
 

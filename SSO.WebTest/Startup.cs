@@ -36,10 +36,13 @@ namespace SSO.WebTest
             {
                 options.Filters.Add(new CorsAuthorizationFilterFactory("CorsPolicy"));
             });
+
             var authTokenProviderOptions = Configuration.GetSection("AuthTokenProviderOptions");
             var validIssuer = authTokenProviderOptions?["Issuer"];
+
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options => options.LoginPath = new PathString("/account/login"));
+            .AddCookie(options => options.LoginPath = new PathString("/account/login"));
+
             services.AddMvc();
         }
 
@@ -59,11 +62,14 @@ namespace SSO.WebTest
             app.UseStaticFiles();
             var authTokenProviderOptions = Configuration.GetSection("AuthTokenProviderOptions");
             var validIssuer = authTokenProviderOptions?["Issuer"];
+
             app.UseSSO(new SSOOptions()
             {
                 Issuer = validIssuer
             });
+
             app.UseAuthentication();
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
