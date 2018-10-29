@@ -24,15 +24,10 @@ namespace SSO.API.Controllers
         protected readonly SocialNetworksHelper _socialNetworksHelper;
         protected readonly IAccountService _accountService;
 
-        public AccountApiController(
-            SocialNetworksHelper socialNetworksHelper,
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            IEmailSender emailSender,
-            IConfiguration configuration)
+        public AccountApiController(SocialNetworksHelper socialNetworksHelper, UserManager<ApplicationUser> userManager,
+                                    SignInManager<ApplicationUser> signInManager, IEmailSender emailSender, IConfiguration configuration)
         {
             _accountService = new AccountService(socialNetworksHelper, userManager, signInManager, emailSender, configuration);
-
             _socialNetworksHelper = socialNetworksHelper;
             _emailSender = emailSender;
             _userManager = userManager;
