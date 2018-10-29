@@ -19,11 +19,8 @@ namespace SSO.API.Controllers
         private readonly IEmailSender _emailSender;
         private readonly IConfiguration _configuration;
 
-        public AccountController(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            IEmailSender emailSender,
-            IConfiguration configuration)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
+                                 IEmailSender emailSender, IConfiguration configuration)
         {
             _emailSender = emailSender;
             _userManager = userManager;

@@ -1,15 +1,16 @@
-﻿namespace SSO.API.Common
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+
+namespace SSO.API.Common
 {
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.Configuration;
-    using Newtonsoft.Json;
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Net;
-    using System.Net.Http;
-    using System.Text;
-    using System.Threading.Tasks;
 
     public class SocialNetworksHelper
     {
@@ -38,8 +39,9 @@
 
             string result = await webClient.GetStringAsync(accessTokenUrl);
             dynamic accessTokenResponse = JsonConvert.DeserializeObject(result);
-            var profileUrl = string.Format("https://graph.facebook.com/v2.10/me?fields=id,name,email,first_name,last_name,picture.type(large)&access_token={0}", accessTokenResponse.access_token);
-
+            dynamic profileUrl =
+                string.Format("https://graph.facebook.com/v2.10/me?fields=id,name,email,first_name,last_name,picture.type(large)&access_token={0}",
+                              accessTokenResponse.access_token);
             result = await webClient.GetStringAsync(profileUrl);
             var profileResponse = JsonConvert.DeserializeObject<dynamic>(result);
 
