@@ -1,30 +1,23 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SSO.Middleware
 {
     public class SSOMiddleware
     {
-        private readonly RequestDelegate next;
+        private readonly RequestDelegate _next;
         private readonly SSOOptions _options;
 
-        public SSOMiddleware(RequestDelegate next,
-            SSOOptions options)
+        public SSOMiddleware(RequestDelegate next, SSOOptions options)
         {
             _options = options;
-            this.next = next;
+            _next = next;
         }
 
         public async Task Invoke(HttpContext context)
@@ -37,23 +30,28 @@ namespace SSO.Middleware
                 context.Response.Redirect(_options.Issuer + $"?returnUrl={protocol}{context.Request.Host}{returnUrl}");
                 return;
             }
+
             var token = context.Request.Query["token"];
             var redirectUrl = context.Request.Query["redirectUrl"];
-            if (String.IsNullOrEmpty(token))
+
+            if (string.IsNullOrEmpty(token))
             {
-                await next(context);
+                await _next(context);
                 return;
             }
+
             var ssoToken = token.FirstOrDefault();
             var client = new HttpClient();
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + ssoToken);
             HttpResponseMessage response = await client.GetAsync(_options.Issuer + "/api/account/getUser");
+
             if (response == null || !response.IsSuccessStatusCode)
             {
-                await next(context);
+                await _next(context);
                 return;
             }
-            var user = JsonConvert.DeserializeObject<TempUser>(await response.Content.ReadAsStringAsync());
+
+            TempUser user = JsonConvert.DeserializeObject<TempUser>(await response.Content.ReadAsStringAsync());
             var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
             identity.AddClaim(new Claim(ClaimTypes.Name, user.UserName));
             identity.AddClaim(new Claim("sso-token", ssoToken));
