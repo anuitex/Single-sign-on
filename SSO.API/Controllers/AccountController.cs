@@ -30,10 +30,8 @@ namespace SSO.API.Controllers
         private readonly IEmailSender _emailSender;
         private readonly IConfiguration _configuration;
 
-        public AccountController(UserManager<ApplicationUser> userManager,
-           SignInManager<ApplicationUser> signInManager,
-           IEmailSender emailSender,
-           IConfiguration configuration)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
+                                 IEmailSender emailSender, IConfiguration configuration)
         {
             _emailSender = emailSender;
             _userManager = userManager;
@@ -45,7 +43,7 @@ namespace SSO.API.Controllers
         public IActionResult Login(string returnUrl)
         {
             var view = new LoginAccountView();
-            if (String.IsNullOrEmpty(returnUrl))
+            if (string.IsNullOrEmpty(returnUrl))
             {
                 view.ReturnUrl = _configuration["RedirectUrl"];
             }
@@ -56,7 +54,7 @@ namespace SSO.API.Controllers
         [HttpGet]
         public IActionResult Register(string returnUrl)
         {
-            if (String.IsNullOrEmpty(returnUrl))
+            if (string.IsNullOrEmpty(returnUrl))
             {
                 returnUrl = _configuration["RedirectUrl"];
             }
@@ -109,16 +107,21 @@ namespace SSO.API.Controllers
             {
                 return View(model);
             }
+
             var user = await _userManager.FindByEmailAsync(model.Email);
+
             if (user == null)
             {
                 return Redirect("/Error/Index");
             }
+
             var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
+
             if (result.Succeeded)
             {
                 return RedirectToAction(nameof(ResetPasswordConfirmation));
             }
+
             AddErrors(result);
             return View();
         }
@@ -152,6 +155,7 @@ namespace SSO.API.Controllers
             {
                 return Redirect("/Error/Index");
             }
+
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             var model = new LoginWith2faViewModel();
             model.UserId = userId;
