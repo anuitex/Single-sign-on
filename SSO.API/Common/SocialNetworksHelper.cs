@@ -3,14 +3,12 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Net;
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.Options;
     using Newtonsoft.Json;
 
     public class SocialNetworksHelper
@@ -36,16 +34,15 @@
         public async Task<dynamic> GetFacebookDetails(dynamic value)
         {
             var webClient = new HttpClient();
-            var accessTokenUrl =
+            string accessTokenUrl =
                 $"https://graph.facebook.com/v2.10/oauth/access_token?redirect_uri={value.redirectUri}&code={value.code}&client_id={_configuration["FacebookPublicKey"].ToString()}&client_secret={_configuration["FacebookSecretKey"].ToString()}";
 
-            var result = await webClient.GetStringAsync(accessTokenUrl);
+            string result = await webClient.GetStringAsync(accessTokenUrl);
             dynamic accessTokenResponse = JsonConvert.DeserializeObject(result);
 
-            var profileUrl =
-                string.Format(
-                    "https://graph.facebook.com/v2.10/me?fields=id,name,email,first_name,last_name,picture.type(large)&access_token={0}",
-                    accessTokenResponse.access_token);
+            dynamic profileUrl =
+                string.Format("https://graph.facebook.com/v2.10/me?fields=id,name,email,first_name,last_name,picture.type(large)&access_token={0}",
+                              accessTokenResponse.access_token);
 
             result = await webClient.GetStringAsync(profileUrl);
 
@@ -55,8 +52,7 @@
 
         public async Task<dynamic> GetFacebookDetailsByToken(string token)
         {
-            var profileUrl =
-                $"https://graph.facebook.com/v2.10/me?fields=id,name,email,first_name,last_name,picture.type(large)&access_token={token}";
+            var profileUrl = $"https://graph.facebook.com/v2.10/me?fields=id,name,email,first_name,last_name,picture.type(large)&access_token={token}";
 
             var webClient = new HttpClient();
             var result = await webClient.GetStringAsync(profileUrl);
@@ -163,7 +159,7 @@
 
         public async Task<string> GetGoogleAvatar(string profileId)
         {
-            string avatarUrl = String.Empty;
+            string avatarUrl = string.Empty;
             var webClient = new HttpClient();
             var profileUrl = $"https://www.googleapis.com/plus/v1/people/{profileId}?fields=image&key={_configuration["GoogleApiKey"].ToString()}";
 

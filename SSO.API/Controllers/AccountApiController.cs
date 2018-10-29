@@ -26,13 +26,9 @@ namespace SSO.API.Controllers
         protected readonly IEmailSender _emailSender;
         protected readonly IConfiguration _configuration;
         protected readonly SocialNetworksHelper _socialNetworksHelper;
-        public AccountApiController(
-            SocialNetworksHelper socialNetworksHelper,
-           UserManager<ApplicationUser> userManager,
-           SignInManager<ApplicationUser> signInManager,
-           IEmailSender emailSender,
-           IConfiguration configuration
-           )
+
+        public AccountApiController(SocialNetworksHelper socialNetworksHelper, UserManager<ApplicationUser> userManager,
+                                    SignInManager<ApplicationUser> signInManager, IEmailSender emailSender, IConfiguration configuration)
         {
             _socialNetworksHelper = socialNetworksHelper;
             _emailSender = emailSender;
