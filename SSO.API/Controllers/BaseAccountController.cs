@@ -15,11 +15,8 @@ namespace SSO.API.Controllers
         protected readonly IEmailSender _emailSender;
         protected readonly IConfiguration _configuration;
 
-        public BaseAccountController(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            IEmailSender emailSender,
-            IConfiguration configuration)
+        public BaseAccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
+                                     IEmailSender emailSender, IConfiguration configuration)
         {
             _emailSender = emailSender;
             _userManager = userManager;

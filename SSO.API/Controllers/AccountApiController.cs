@@ -124,7 +124,7 @@ namespace SSO.API.Controllers
                 Email = model.Email
             };
 
-            if (String.IsNullOrEmpty(model.ReturnUrl))
+            if (string.IsNullOrEmpty(model.ReturnUrl))
             {
                 model.ReturnUrl = _configuration["RedirectUrl"];
             }
@@ -242,7 +242,7 @@ namespace SSO.API.Controllers
 
             var token = _accountService.GenerateJwtToken(email, user);
 
-            if (!String.IsNullOrEmpty(token))
+            if (!string.IsNullOrEmpty(token))
             {
                 return Ok(new
                 {
