@@ -41,7 +41,7 @@ namespace SSO.API.Controllers
         [Route("api/account/login")]
         public async Task<IActionResult> Login([FromBody]LoginAccountView model)
         {
-            if (String.IsNullOrEmpty(model.ReturnUrl))
+            if (string.IsNullOrEmpty(model.ReturnUrl))
             {
                 model.ReturnUrl = _configuration["RedirectUrl"];
             }
