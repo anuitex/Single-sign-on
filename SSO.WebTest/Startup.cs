@@ -1,27 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Cors.Internal;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Primitives;
-using Microsoft.IdentityModel.Tokens;
-using SSO.DataAccess;
-using SSO.DataAccess.Entities;
-using Microsoft.AspNetCore.Authentication;
-using System.Net.Http;
-using Newtonsoft.Json;
 using SSO.Middleware;
 
 namespace SSO.WebTest
@@ -52,10 +36,13 @@ namespace SSO.WebTest
             {
                 options.Filters.Add(new CorsAuthorizationFilterFactory("CorsPolicy"));
             });
+
             var authTokenProviderOptions = Configuration.GetSection("AuthTokenProviderOptions");
             var validIssuer = authTokenProviderOptions?["Issuer"];
+
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options => options.LoginPath = new PathString("/account/login"));
+            .AddCookie(options => options.LoginPath = new PathString("/account/login"));
+
             services.AddMvc();
         }
 
@@ -75,11 +62,14 @@ namespace SSO.WebTest
             app.UseStaticFiles();
             var authTokenProviderOptions = Configuration.GetSection("AuthTokenProviderOptions");
             var validIssuer = authTokenProviderOptions?["Issuer"];
+
             app.UseSSO(new SSOOptions()
             {
                 Issuer = validIssuer
             });
+
             app.UseAuthentication();
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

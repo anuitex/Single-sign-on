@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SSO.API.Models.AccountViewModels;
 using SSO.API.Services;
+using SSO.API.Services.Interfaces;
 using SSO.DataAccess.Entities;
 using System;
 using System.Collections.Generic;
@@ -28,8 +29,7 @@ namespace SSO.API.Controllers
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IEmailSender emailSender,
-            IConfiguration configuration
-            )
+            IConfiguration configuration)
         {
             _emailSender = emailSender;
             _userManager = userManager;

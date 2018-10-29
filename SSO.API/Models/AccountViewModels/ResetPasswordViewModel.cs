@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace SSO.API.Models.AccountViewModels
 {
-    public class ResetPasswordViewModel 
+    public class ResetPasswordViewModel
     {
         [Required]
         [EmailAddress]

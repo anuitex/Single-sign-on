@@ -1,26 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using SSO.API.Models;
-using SSO.API.Services;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Swashbuckle.AspNetCore.Swagger;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Cors.Internal;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using SSO.API.Common;
+using SSO.API.Services;
+using SSO.API.Services.Interfaces;
 using SSO.DataAccess;
 using SSO.DataAccess.Entities;
+using Swashbuckle.AspNetCore.Swagger;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 namespace SSO.API
 {
@@ -32,13 +28,12 @@ namespace SSO.API
         }
 
         public IConfiguration Configuration { get; }
-        
+
         public void ConfigureServices(IServiceCollection services)
         {
             // ===== Add our DbContext ========
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
             // ===== Add Identity ========
             services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
             {
@@ -47,8 +42,10 @@ namespace SSO.API
                 options.Password.RequireLowercase = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
-            }).AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+            })
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
+
             services.AddLogging();
             // Add service and create Policy with options
             services.AddCors(options =>
@@ -59,12 +56,14 @@ namespace SSO.API
                     .AllowAnyHeader()
                     .AllowCredentials());
             });
+
             services.Configure<MvcOptions>(options =>
             {
                 options.Filters.Add(new CorsAuthorizationFilterFactory("CorsPolicy"));
             });
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
+            services.AddTransient<SocialNetworksHelper>();
 
             // ===== Add Jwt Authentication ========
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims
@@ -74,6 +73,7 @@ namespace SSO.API
             var secretKey = appSettings?["JwtKey"] ?? "default_secret_key";
             var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey));
             var validIssuer = authTokenProviderOptions?["Issuer"];
+
             var tokenValidationParameters = new TokenValidationParameters
             {
                 // The signing key must match!
@@ -94,6 +94,7 @@ namespace SSO.API
                 // If you want to allow a certain amount of clock drift, set that here:
                 ClockSkew = TimeSpan.Zero
             };
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -104,6 +105,7 @@ namespace SSO.API
                 o.TokenValidationParameters = tokenValidationParameters;
                 o.RequireHttpsMetadata = false;
             });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "Contacts API", Version = "v1" });
@@ -115,9 +117,10 @@ namespace SSO.API
                     Type = "apiKey"
                 });
             });
+
             services.AddMvc();
         }
-        
+
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             // ===== Create database ========
@@ -142,19 +145,21 @@ namespace SSO.API
             app.UseCors("CorsPolicy");
             app.UseAuthentication();
             app.UseSwagger();
+
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Contacts API V1");
             });
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Account}/{action=Login}/{id?}");
             });
-      //      app.UseFacebookAuthentication(
-      //appId: "000000000000000",
-      //appSecret: "000000000000000");
+            //      app.UseFacebookAuthentication(
+            //appId: "000000000000000",
+            //appSecret: "000000000000000");
         }
     }
 }

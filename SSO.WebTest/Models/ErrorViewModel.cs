@@ -1,5 +1,3 @@
-using System;
-
 namespace SSO.WebTest.Models
 {
     public class ErrorViewModel

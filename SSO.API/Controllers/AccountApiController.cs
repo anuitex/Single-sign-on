@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using SSO.API.Common;
 using SSO.API.Models;
 using SSO.API.Models.AccountViewModels;
 using SSO.API.Services;
+using SSO.API.Services.Interfaces;
 using SSO.DataAccess.Entities;
 using SSO.ViewModels;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SSO.API.Controllers
 {
@@ -26,14 +22,17 @@ namespace SSO.API.Controllers
         protected readonly IEmailSender _emailSender;
         protected readonly IConfiguration _configuration;
         protected readonly SocialNetworksHelper _socialNetworksHelper;
+        protected readonly IAccountService _accountService;
+
         public AccountApiController(
             SocialNetworksHelper socialNetworksHelper,
-           UserManager<ApplicationUser> userManager,
-           SignInManager<ApplicationUser> signInManager,
-           IEmailSender emailSender,
-           IConfiguration configuration
-           )
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            IEmailSender emailSender,
+            IConfiguration configuration)
         {
+            _accountService = new AccountService(socialNetworksHelper, userManager, signInManager, emailSender, configuration);
+
             _socialNetworksHelper = socialNetworksHelper;
             _emailSender = emailSender;
             _userManager = userManager;
@@ -49,58 +48,20 @@ namespace SSO.API.Controllers
             {
                 model.ReturnUrl = _configuration["RedirectUrl"];
             }
+
             if (!ModelState.IsValid)
             {
                 return BadRequest("Invalid model!");
             }
-            
-            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            if (result.RequiresTwoFactor)
-            {
-               
-                var code = await _userManager.GenerateTwoFactorTokenAsync(user, "Default");
-                await _emailSender.SendEmailAsync(user.Email, "Two-factor authentication",
-                    $"There is the code for login: <input value=\"{code}\"/>");
-                return Ok(new
-                {
-                    UserInfo = new
-                    {
-                        user.Id,
-                        user.UserName,
-                        token = String.Empty
-                    },
-                    ReturnUrl = $"/Account/LoginWith2fa?userId={user.Id}&returnUrl={model.ReturnUrl}"
-                });
-            }
-            if (!result.Succeeded)
+
+            var result = await _accountService.Login(model, Request.Host.ToString());
+
+            if (result == null)
             {
                 return BadRequest("Invalid login attempt!");
             }
-            var token = GenerateJwtToken(model.Email, user);
-            if (model.ReturnUrl.Contains(Request.Host.ToString()))
-            {
-                return Ok(new
-                {
-                    UserInfo = new
-                    {
-                        user.Id,
-                        user.UserName,
-                        token
-                    },
-                    model.ReturnUrl
-                });
-            }
-            return Ok(new
-            {
-                UserInfo = new
-                {
-                    user.Id,
-                    user.UserName,
-                    token
-                },
-                ReturnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={model.ReturnUrl}"
-            });
+
+            return Ok(result);
         }
 
         [HttpPost]
@@ -111,18 +72,28 @@ namespace SSO.API.Controllers
             {
                 return View(model);
             }
+            //-=-=-=-=-=-=-=--=-=-=-=-=-
+            try
+            {
+                var serviceResult = await _accountService.LoginWith2FA(model);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new {ex.Message, ex.Data});
+            }
+            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();//
 
-            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
                 return BadRequest($"Unable to load user with this ID.");
             }
-            
-            var result = await _signInManager.TwoFactorSignInAsync("Default",model.TwoFactorCode, true, model.RememberMachine);
+
+            var result = await _signInManager.TwoFactorSignInAsync("Default", model.TwoFactorCode, true, model.RememberMachine);
 
             if (result.Succeeded)
             {
-                var token = GenerateJwtToken(user.Email, user);
+                var token = _accountService.GenerateJwtToken(user.Email, user);
+
                 return Ok(new
                 {
                     UserInfo = new
@@ -134,13 +105,14 @@ namespace SSO.API.Controllers
                     ReturnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={model.ReturnUrl}"
                 });
             }
+
             if (result.IsLockedOut)
             {
                 return BadRequest("Account has been locked!");
             }
+
             return BadRequest("Invalid authenticator code.");
         }
-
 
         [HttpPost]
         [Route("api/account/register")]
@@ -151,23 +123,29 @@ namespace SSO.API.Controllers
                 UserName = model.Email,
                 Email = model.Email
             };
+
             if (String.IsNullOrEmpty(model.ReturnUrl))
             {
                 model.ReturnUrl = _configuration["RedirectUrl"];
             }
+
             var result = await _userManager.CreateAsync(user, model.Password);
-            var error = GetErrors(result).Select(x => x.Description).FirstOrDefault();
+            var error = _accountService.GetErrors(result).Select(x => x.Description).FirstOrDefault();
+
             if (error != null)
             {
                 return BadRequest(error);
             }
+
             if (result.Succeeded)
             {
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
                 await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
+
                 return Ok(model.ReturnUrl);
             }
+
             return BadRequest();
         }
 
@@ -196,7 +174,9 @@ namespace SSO.API.Controllers
             {
                 return BadRequest("Invalid model!");
             }
+
             var user = await _userManager.FindByEmailAsync(model.Email);
+
             if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
             {
                 return BadRequest("User doesn't exist or isn't confirmed");
@@ -204,8 +184,7 @@ namespace SSO.API.Controllers
 
             var code = await _userManager.GeneratePasswordResetTokenAsync(user);
             var callbackUrl = Url.ResetPasswordCallbackLink(user.Id, code, Request.Scheme);
-            await _emailSender.SendEmailAsync(model.Email, "Reset Password",
-               $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>");
+            await _emailSender.SendEmailAsync(model.Email, "Reset Password", $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>");
             return Ok();
         }
 
@@ -227,6 +206,7 @@ namespace SSO.API.Controllers
                 {
                     userProfileViewModel.FirstName = profileResponse.name.givenName;
                 }
+
                 if (profileResponse.name.familyName != null)
                 {
                     userProfileViewModel.LastName = profileResponse.name.familyName;
@@ -254,11 +234,13 @@ namespace SSO.API.Controllers
         private async Task<IActionResult> GetLoginResponse(string provider, string email)
         {
             var user = await _userManager.FindByLoginAsync(provider, email);
+
             if (user == null)
             {
                 return BadRequest("User login info not found");
             }
-            var token = GenerateJwtToken(email, user);
+
+            var token = _accountService.GenerateJwtToken(email, user);
 
             if (!String.IsNullOrEmpty(token))
             {
@@ -307,7 +289,7 @@ namespace SSO.API.Controllers
                     return BadRequest("Error creating user");
                 }
 
-             }
+            }
 
             var loginResult = await _signInManager.ExternalLoginSignInAsync(provider, model.Email, false);
 
@@ -325,45 +307,6 @@ namespace SSO.API.Controllers
         {
             var result = await _userManager.CreateAsync(newUser);
             return result;
-        }
-
-        private string GenerateJwtToken(string email, ApplicationUser user)
-        {
-            var claims = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.UniqueName, email),
-                new Claim(JwtRegisteredClaimNames.Email, email),
-                new Claim(JwtRegisteredClaimNames.Sub, email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-            };
-
-            var expires = DateTime.Now.AddDays(Convert.ToDouble(_configuration["JwtExpireDays"]));
-            var appSettings = _configuration.GetSection("AppSettings");
-            var authTokenProviderOptions = _configuration.GetSection("AuthTokenProviderOptions");
-            var key = appSettings?["JwtKey"] ?? "default_secret_key";
-            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key));
-            var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-            var validIssuer = authTokenProviderOptions?["Issuer"];
-            var token = new JwtSecurityToken(
-                validIssuer,
-                validIssuer,
-                claims,
-                expires: expires,
-                signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-        private List<IdentityError> GetErrors(IdentityResult result)
-        {
-            var errors = new List<IdentityError>();
-            foreach (var error in result.Errors)
-            {
-                errors.Add(error);
-            }
-            return errors;
         }
     }
 }

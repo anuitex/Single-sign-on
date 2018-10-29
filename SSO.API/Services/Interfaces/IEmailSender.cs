@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace WebApplication1.Services
+namespace SSO.API.Services.Interfaces
 {
     public interface IEmailSender
     {
