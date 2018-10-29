@@ -279,8 +279,7 @@ namespace SSO.API.Controllers
 
         private async Task<IActionResult> LoginExternal(AuthenticationViewModel model, string provider)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email) ??
-                       await _userManager.FindByLoginAsync(provider, model.Email);
+            var user = await _userManager.FindByEmailAsync(model.Email) ?? await _userManager.FindByLoginAsync(provider, model.Email);
 
             if (user == null)
             {
