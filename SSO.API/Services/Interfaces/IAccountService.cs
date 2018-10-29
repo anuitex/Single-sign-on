@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SSO.API.Models;
 using SSO.API.Models.AccountViewModels;
@@ -12,9 +13,9 @@ namespace SSO.API.Services.Interfaces
     {
         Task<AccountLoginResponseModel> Login(LoginAccountView model, string hostNameString);
         Task<AccountLoginResponseModel> LoginWith2FA(LoginWith2faViewModel model);
-        Task<IActionResult> Register();
+        Task<string> Register(RegisterAccountView model, IUrlHelper url, HttpRequest request);
         Task<IActionResult> GetUser();
-        Task<IActionResult> ForgotPassword();
+        Task<bool> ForgotPassword(ForgotPasswordViewModel model, IUrlHelper url, HttpRequest request);
         Task<IActionResult> GoogleToken();
         List<IdentityError> GetErrors(IdentityResult result);
         string GenerateJwtToken(string email, ApplicationUser user);

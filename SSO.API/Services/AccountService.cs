@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -10,6 +11,7 @@ using SSO.DataAccess.Entities;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -102,17 +104,79 @@ namespace SSO.API.Services
                 throw new Exception($"Unable to load user with this ID.");
             }
 
-            throw new NotImplementedException();
+            var result = await _signInManager.TwoFactorSignInAsync("Default", model.TwoFactorCode, true, model.RememberMachine);
+
+            if(result.IsLockedOut)
+            {
+                throw new Exception("Account has been locked!");
+            }
+
+            if(!result.Succeeded)
+            {
+                throw new Exception("Invalid authenticator code.");
+            }
+
+            var token = GenerateJwtToken(user.Email, user);
+
+            return new AccountLoginResponseModel
+            {
+                UserInfo = new UserInfoViewModel
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    token = token
+                },
+                ReturnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={model.ReturnUrl}"
+            };
         }
 
-        public Task<IActionResult> Register()
+        public async Task<string> Register(RegisterAccountView model, IUrlHelper url, HttpRequest request)
         {
-            throw new NotImplementedException();
+            var user = new ApplicationUser
+            {
+                UserName = model.Email,
+                Email = model.Email
+            };
+
+            if (String.IsNullOrEmpty(model.ReturnUrl))
+            {
+                model.ReturnUrl = _configuration["RedirectUrl"];
+            }
+            
+            var result = await _userManager.CreateAsync(user, model.Password);
+            var error = GetErrors(result).Select(x => x.Description).FirstOrDefault();
+
+            if(error != null)
+            {
+                throw new Exception(error);
+            }
+
+            if (!result.Succeeded)
+            {
+                return null;
+            }
+
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var callbackUrl = url.EmailConfirmationLink(user.Id, code, request.Scheme);
+            await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
+
+            return model.ReturnUrl;
         }
 
-        public Task<IActionResult> ForgotPassword()
+        public async Task<bool> ForgotPassword(ForgotPasswordViewModel model, IUrlHelper url, HttpRequest request)
         {
-            throw new NotImplementedException();
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+            {
+                return false;
+            }
+
+            var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var callbackUrl = url.ResetPasswordCallbackLink(user.Id, code, request.Scheme);
+            await _emailSender.SendEmailAsync(model.Email, "Reset Password", $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>");
+
+            return true;
         }
 
         public Task<IActionResult> GetUser()
