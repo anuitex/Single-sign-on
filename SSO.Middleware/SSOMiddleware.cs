@@ -38,7 +38,7 @@ namespace SSO.Middleware
 
             if (String.IsNullOrEmpty(token))
             {
-                await next(context);
+                await _next(context);
 
                 return;
             }

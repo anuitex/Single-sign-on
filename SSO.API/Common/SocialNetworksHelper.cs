@@ -39,7 +39,9 @@ namespace SSO.API.Common
 
             string result = await webClient.GetStringAsync(accessTokenUrl);
             dynamic accessTokenResponse = JsonConvert.DeserializeObject(result);
-
+            dynamic profileUrl =
+                string.Format("https://graph.facebook.com/v2.10/me?fields=id,name,email,first_name,last_name,picture.type(large)&access_token={0}",
+                              accessTokenResponse.access_token);
             result = await webClient.GetStringAsync(profileUrl);
             var profileResponse = JsonConvert.DeserializeObject<dynamic>(result);
 
