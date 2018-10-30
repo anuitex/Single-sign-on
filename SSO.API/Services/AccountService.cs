@@ -180,9 +180,10 @@ namespace SSO.API.Services
             return true;
         }
 
-        public Task<IActionResult> GetUser()
+        public async Task<ApplicationUser> GetUser(string name)
         {
-            throw new NotImplementedException();
+            var appUser = await _userManager.FindByEmailAsync(name);
+            return appUser;
         }
 
         public async Task<AuthenticationViewModel> GoogleToken(string token)
@@ -229,6 +230,34 @@ namespace SSO.API.Services
             }
 
             return errors;
+        }
+
+        public async Task<AccountLoginResponseModel> GetLoginResponse(string provider, string email)
+        {
+            var user = await _userManager.FindByLoginAsync(provider, email);
+
+            if (user == null)
+            {
+                throw new Exception("User login info not found");
+            }
+
+            var token = GenerateJwtToken(email, user);
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                return new AccountLoginResponseModel
+                {
+                    UserInfo = new UserInfoViewModel
+                    {
+                        Id = user.Id,
+                        UserName = user.UserName,
+                        token = token
+                    },
+                    ReturnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={_configuration["RedirectUrl"]}"
+                };
+            }
+
+            throw new Exception("Cannot verify the login. Probably user profile is disabled or deleted.");
         }
 
         public string GenerateJwtToken(string email, ApplicationUser user)

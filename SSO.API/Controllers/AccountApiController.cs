@@ -148,30 +148,15 @@ namespace SSO.API.Controllers
 
         private async Task<IActionResult> GetLoginResponse(string provider, string email)
         {
-            var user = await _userManager.FindByLoginAsync(provider, email);
-
-            if (user == null)
+            try
             {
-                return BadRequest("User login info not found");
+                var result = await _accountService.GetLoginResponse(provider, email);
+                return Ok(result);
             }
-
-            var token = _accountService.GenerateJwtToken(email, user);
-
-            if (!string.IsNullOrEmpty(token))
+            catch(Exception ex)
             {
-                return Ok(new
-                {
-                    UserInfo = new
-                    {
-                        user.Id,
-                        user.UserName,
-                        token
-                    },
-                    ReturnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={_configuration["RedirectUrl"]}"
-                });
+                return BadRequest(ex.Message);
             }
-
-            return BadRequest("Cannot verify the login. Probably user profile is disabled or deleted.");
         }
 
         private async Task<IActionResult> LoginExternal(AuthenticationViewModel model, string provider)
