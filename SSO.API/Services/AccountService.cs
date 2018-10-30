@@ -241,6 +241,48 @@ namespace SSO.API.Services
             throw new Exception("Cannot verify the login. Probably user profile is disabled or deleted.");
         }
 
+        public async Task<Microsoft.AspNetCore.Identity.SignInResult> LoginExternal(AuthenticationViewModel model, string provider)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email) ?? await _userManager.FindByLoginAsync(provider, model.Email);
+
+            if (user == null)
+            {
+                var newUser = new ApplicationUser
+                {
+                    Email = model.Email,
+                    UserName = model.Email,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    PhotoUrl = model.PhotoUrl,
+                    AvatarType = model.AvatarType,
+                    EmailConfirmed = true,
+                    FacebookProfileId = model.FacebookProfileId,
+                    GoogleProfileId = model.GoogleProfileId,
+                    VkProfileId = model.VkProfileId,
+                    TwitterProfileId = model.TwitterProfileId,
+                    RegistrationDate = DateTime.Now,
+                    AvatarSet = !String.IsNullOrWhiteSpace(model.PhotoUrl)
+                };
+
+                IdentityResult identityResult = await CreateNewUser(newUser, String.Empty, provider);
+
+                if (!identityResult.Succeeded)
+                {
+                    throw new Exception("Error creating user");
+                }
+            }
+
+            var result = await _signInManager.ExternalLoginSignInAsync(provider, model.Email, false);
+
+            return result;
+        }
+
+        private async Task<IdentityResult> CreateNewUser(ApplicationUser newUser, string param, string provider)
+        {
+            var result = await _userManager.CreateAsync(newUser);
+            return result;
+        }
+
         public string GenerateJwtToken(string email, ApplicationUser user)
         {
             var claims = new List<Claim>

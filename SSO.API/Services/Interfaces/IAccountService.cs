@@ -21,5 +21,6 @@ namespace SSO.API.Services.Interfaces
         List<IdentityError> GetErrors(IdentityResult result);
         string GenerateJwtToken(string email, ApplicationUser user);
         Task<AccountLoginResponseModel> GetLoginResponse(string provider, string email);
+        Task<Microsoft.AspNetCore.Identity.SignInResult> LoginExternal(AuthenticationViewModel model, string provider);
     }
 }
