@@ -1,13 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SSO.API.Models;
-using SSO.API.Models.AccountViewModels;
-using SSO.API.Services.Interfaces;
 using SSO.DataAccess.Entities;
-using System;
-using System.Threading.Tasks;
+using SSO.API.Services.Interfaces;
+using SSO.API.Models.AccountViewModels;
 
 namespace SSO.API.Controllers
 {
@@ -33,12 +32,12 @@ namespace SSO.API.Controllers
         {
             var view = new LoginAccountView();
 
-            if (String.IsNullOrEmpty(returnUrl))
+            if (string.IsNullOrEmpty(returnUrl))
             {
                 view.ReturnUrl = _configuration["RedirectUrl"];
             }
 
-            ViewData["ReturnUrl"] = returnUrl;
+            view.ReturnUrl = returnUrl;
             return View(view);
         }
 
@@ -298,9 +297,5 @@ namespace SSO.API.Controllers
         //{
         //    return View();
         //}
-
-
-
-
     }
 }
