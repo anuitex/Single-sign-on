@@ -134,66 +134,31 @@ namespace SSO.API.Controllers
         [Route("google-token/{token}")]
         public async Task<IActionResult> GoogleToken(string token)
         {
-            var userProfileViewModel = await _accountService.GoogleToken(token);
+            string google = "google";
 
-            var loginResult = await LoginExternal(userProfileViewModel, "google");
-
-            if (loginResult.GetType() != typeof(OkObjectResult))
-            {
-                return loginResult;
-            }
-
-            return await GetLoginResponse("google", userProfileViewModel.Email);
-        }
-
-        private async Task<IActionResult> GetLoginResponse(string provider, string email)
-        {
             try
             {
-                var result = await _accountService.GetLoginResponse(provider, email);
+                var userProfileViewModel = await _accountService.GoogleToken(token);
+
+                var loginResult = LoginExternal(userProfileViewModel, google);//cant be done
+
+                var result = await _accountService.GetLoginResponse(google, userProfileViewModel.Email);
+
                 return Ok(result);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
 
-        private async Task<IActionResult> LoginExternal(AuthenticationViewModel model, string provider)
+        private async Task<IActionResult> LoginExternal(AuthenticationViewModel model, string provider)//cant be done
         {
-            var user = await _userManager.FindByEmailAsync(model.Email) ?? await _userManager.FindByLoginAsync(provider, model.Email);
-
-            if (user == null)
-            {
-                var newUser = new ApplicationUser
-                {
-                    Email = model.Email,
-                    UserName = model.Email,
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    PhotoUrl = model.PhotoUrl,
-                    AvatarType = model.AvatarType,
-                    EmailConfirmed = true,
-                    FacebookProfileId = model.FacebookProfileId,
-                    GoogleProfileId = model.GoogleProfileId,
-                    VkProfileId = model.VkProfileId,
-                    TwitterProfileId = model.TwitterProfileId,
-                    RegistrationDate = DateTime.Now,
-                    AvatarSet = !String.IsNullOrWhiteSpace(model.PhotoUrl)
-                };
-
-                IdentityResult result = await CreateNewUser(newUser, String.Empty, provider);
-
-                if (!result.Succeeded)
-                {
-                    return BadRequest("Error creating user");
-                }
-
-            }
-
+            var res = await _accountService.LoginExternal(model, provider);
+            
             var loginResult = await _signInManager.ExternalLoginSignInAsync(provider, model.Email, false);
 
-            return ProcessExternalLoginResult(loginResult, model.Email);
+            return ProcessExternalLoginResult(loginResult, model.Email);//cant be done
         }
 
         //TODO: figure out proper logic for processing loginResults
