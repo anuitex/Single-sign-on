@@ -28,12 +28,8 @@ namespace SingleSignOn.API.Areas.Account.Controllers
         private IAccountService _accountService;
         private readonly ILogger _logger;
 
-        public AccountController(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            ILogger<AccountController> logger,
-            IAccountService accountService,
-            IConfiguration configuration)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ILogger<AccountController> logger,
+                                 IAccountService accountService, IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -57,7 +53,7 @@ namespace SingleSignOn.API.Areas.Account.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginAccountViewModel model)
         {
-            if (String.IsNullOrEmpty(model.ReturnUrl))
+            if (string.IsNullOrEmpty(model.ReturnUrl))
             {
                 model.ReturnUrl = _configuration["RedirectUrl"];
             }
@@ -139,7 +135,7 @@ namespace SingleSignOn.API.Areas.Account.Controllers
         [HttpGet]
         public IActionResult Register(string returnUrl)
         {
-            if (String.IsNullOrEmpty(returnUrl))
+            if (string.IsNullOrEmpty(returnUrl))
             {
                 returnUrl = _configuration["RedirectUrl"];
             }
@@ -159,12 +155,12 @@ namespace SingleSignOn.API.Areas.Account.Controllers
                 Email = model.Email
             };
 
-            if (String.IsNullOrEmpty(model.ReturnUrl))
+            if (string.IsNullOrEmpty(model.ReturnUrl))
             {
                 model.ReturnUrl = _configuration["RedirectUrl"];
             }
 
-            AccountService _accountService = new AccountService(_configuration, _userManager);
+            var _accountService = new AccountService(_configuration, _userManager);
             var existsUser = await _accountService.FindByName(model.Email);
 
             if (existsUser != null)

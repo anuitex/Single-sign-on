@@ -1,6 +1,8 @@
-﻿namespace SingleSignOn.ViewModels
+﻿using System;
+using Microsoft.AspNetCore.Identity;
+namespace SingleSignOn.ViewModels
 {
-    public class AuthenticationViewModel
+    public class AuthenticationViewModel : IdentityUser<int>
     {
         public string Email { get; set; }
         public string GoogleProfileId { get; set; }

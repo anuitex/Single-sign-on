@@ -11,10 +11,7 @@ namespace SingleSignOn.API.Controllers
         protected readonly SignInManager<ApplicationUser> _signInManager;
         protected readonly IConfiguration _configuration;
 
-        public BaseAccountController(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            IConfiguration configuration)
+        public BaseAccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;

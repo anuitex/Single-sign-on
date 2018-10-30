@@ -7,6 +7,14 @@ using SingleSignOn.DataAccess.Entities;
 using SingleSignOn.DataAccess.Repositories;
 using SingleSignOn.Entities;
 using SingleSignOn.ViewModels.Account;
+using SingleSignOn.Common;
+using SingleSignOn.ResponseModels;
+using System.Security.Claims;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace SingleSignOn.BusinessLogic.Services
 {
@@ -14,7 +22,10 @@ namespace SingleSignOn.BusinessLogic.Services
     {
         private UserRepository<ApplicationUser> _userRepository;
         protected readonly UserManager<ApplicationUser> _userManager;
-        public IConfiguration _configuration;
+        protected readonly SignInManager<ApplicationUser> _signInManager;
+        protected readonly IEmailSender _emailSender;
+        protected readonly IConfiguration _configuration;
+        protected readonly SocialNetworksHelper _socialNetworksHelper;
 
         public AccountService(IConfiguration configuration, UserManager<ApplicationUser> userManager)
         {
@@ -42,6 +53,75 @@ namespace SingleSignOn.BusinessLogic.Services
             return user;
         }
 
+        public async Task<AccountLoginResponseModel> Login(LoginAccountViewModel model, string hostNameString)
+        {
+            SignInResult result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
+            ApplicationUser user = await _userManager.FindByEmailAsync(model.Email);
+            var userInfoViewModel = new UserInfoViewModel(user);
+            var accountLoginResponseModel = new AccountLoginResponseModel();
+            string returnUrl = null;
+
+            if (!result.Succeeded)
+            {
+                return null;
+            }
+
+            if (result.RequiresTwoFactor)
+            {
+                string code = await _userManager.GenerateTwoFactorTokenAsync(user, "Default");
+                await _emailSender.SendEmailAsync(user.Email, "Two-factor authentication", $"There is the code for login: <input value=\"{code}\"/>");
+
+                userInfoViewModel.Token = string.Empty;
+                returnUrl = $"/Account/LoginWith2fa?userId={user.Id}&returnUrl={model.ReturnUrl}";
+            }
+
+            if (!result.RequiresTwoFactor)
+            {
+                string token = GenerateJwtToken(model.Email, user);
+
+                userInfoViewModel.Token = token;
+                returnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={model.ReturnUrl}";
+            }
+
+            accountLoginResponseModel = new AccountLoginResponseModel(userInfoViewModel, returnUrl);
+
+            if (model.ReturnUrl.Contains(hostNameString))
+            {
+                accountLoginResponseModel.ReturnUrl = model.ReturnUrl;
+                return accountLoginResponseModel;
+            }
+
+            return accountLoginResponseModel;
+        }
+
+        public async Task<AccountLoginResponseModel> LoginWith2FA(LoginWith2faViewModel model)
+        {
+            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+
+            if (user == null)
+            {
+                throw new Exception($"Unable to load user with this ID.");
+            }
+
+            var result = await _signInManager.TwoFactorSignInAsync("Default", model.TwoFactorCode, true, model.RememberMachine);
+
+            if (result.IsLockedOut)
+            {
+                throw new Exception("Account has been locked!");
+            }
+
+            if (!result.Succeeded)
+            {
+                throw new Exception("Invalid authenticator code.");
+            }
+
+            var token = GenerateJwtToken(user.Email, user);
+            var userInfoViewModel = new UserInfoViewModel(user, token);
+            var returnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={model.ReturnUrl}";
+            var accountLoginResponseModel = new AccountLoginResponseModel(userInfoViewModel, returnUrl);
+            return accountLoginResponseModel;
+        }
+
         public async Task<IdentityResult> Register(ApplicationUser user, string password)
         {
             var result = await _userManager.CreateAsync(user, password);
@@ -62,6 +142,36 @@ namespace SingleSignOn.BusinessLogic.Services
             emailCredential.EmailDeliveryPassword = forgotPasswordEmailConfiguration.EmailDeliveryPassword;
 
             await _emailProvider.SendMessage(emailCredential, forgotPasswordEmailConfiguration.Subject, forgotPasswordEmailConfiguration.ForgotPasswordBodyStart + callbackUrl + forgotPasswordEmailConfiguration.ForgotPasswordBodyEnd, model.Email);
+        }
+
+        public string GenerateJwtToken(string email, ApplicationUser user)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.UniqueName, email),
+                new Claim(JwtRegisteredClaimNames.Email, email),
+                new Claim(JwtRegisteredClaimNames.Sub, email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+            };
+
+            var expires = DateTime.Now.AddDays(Convert.ToDouble(_configuration["JwtExpireDays"]));
+            var appSettings = _configuration.GetSection("AppSettings");
+            var authTokenProviderOptions = _configuration.GetSection("AuthTokenProviderOptions");
+            var key = appSettings?["JwtKey"] ?? "default_secret_key";
+            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key));
+            var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+            var validIssuer = authTokenProviderOptions?["Issuer"];
+
+            var token = new JwtSecurityToken(
+                validIssuer,
+                validIssuer,
+                claims,
+                expires: expires,
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }
