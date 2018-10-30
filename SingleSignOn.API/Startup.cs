@@ -153,9 +153,9 @@ namespace SingleSignOn.API
 
             app.UseMvc(routes =>
             {
-                routes.MapRoute(
-                     name: "api",
-                     template: "{area=Account}/{controller=Account}/{action=Login}/{id?}");
+                //routes.MapRoute(
+                //     name: "api",
+                //     template: "{area=Account}/{controller=Account}/{action=Login}/{id?}");
 
                 routes.MapRoute(
                     name: "default",
