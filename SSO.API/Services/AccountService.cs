@@ -45,44 +45,40 @@ namespace SSO.API.Services
         {
             Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
             ApplicationUser user = await _userManager.FindByEmailAsync(model.Email);
-            var accountLoginResponseModel = new AccountLoginResponseModel();
             var userInfoViewModel = new UserInfoViewModel(user);
-
-            if (result.RequiresTwoFactor)
-            {
-                var code = await _userManager.GenerateTwoFactorTokenAsync(user, "Default");
-                await _emailSender.SendEmailAsync(user.Email, "Two-factor authentication", $"There is the code for login: <input value=\"{code}\"/>");
-
-                userInfoViewModel.Token = string.Empty;
-                accountLoginResponseModel.UserInfo = userInfoViewModel;
-
-                if (model.ReturnUrl.Contains(hostNameString))
-                {
-                    accountLoginResponseModel.ReturnUrl = model.ReturnUrl;
-                    return accountLoginResponseModel;
-                }
-
-                accountLoginResponseModel.ReturnUrl = $"/Account/LoginWith2fa?userId={user.Id}&returnUrl={model.ReturnUrl}";
-                return accountLoginResponseModel;
-            }
+            var accountLoginResponseModel = new AccountLoginResponseModel();
+            string returnUrl = null;
 
             if (!result.Succeeded)
             {
                 return null;
             }
 
-            var token = GenerateJwtToken(model.Email, user);
+            if (result.RequiresTwoFactor)
+            {
+                string code = await _userManager.GenerateTwoFactorTokenAsync(user, "Default");
+                await _emailSender.SendEmailAsync(user.Email, "Two-factor authentication", $"There is the code for login: <input value=\"{code}\"/>");
 
-            userInfoViewModel.Token = token;
-            accountLoginResponseModel.UserInfo = userInfoViewModel;
+                userInfoViewModel.Token = string.Empty;
+                returnUrl = $"/Account/LoginWith2fa?userId={user.Id}&returnUrl={model.ReturnUrl}";
+            }
+
+            if (!result.RequiresTwoFactor)
+            {
+                string token = GenerateJwtToken(model.Email, user);
+
+                userInfoViewModel.Token = token;
+                returnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={model.ReturnUrl}";
+            }
+
+            accountLoginResponseModel = new AccountLoginResponseModel(userInfoViewModel, returnUrl);
 
             if (model.ReturnUrl.Contains(hostNameString))
             {
                 accountLoginResponseModel.ReturnUrl = model.ReturnUrl;
                 return accountLoginResponseModel;
             }
-            
-            accountLoginResponseModel.ReturnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={model.ReturnUrl}";
+
             return accountLoginResponseModel;
         }
 
@@ -107,12 +103,10 @@ namespace SSO.API.Services
                 throw new Exception("Invalid authenticator code.");
             }
 
-            var accountLoginResponseModel = new AccountLoginResponseModel();
-            var userInfoViewModel = new UserInfoViewModel(user);
             var token = GenerateJwtToken(user.Email, user);
-            userInfoViewModel.Token = token;
-            accountLoginResponseModel.UserInfo = userInfoViewModel;
-            accountLoginResponseModel.ReturnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={model.ReturnUrl}";
+            var userInfoViewModel = new UserInfoViewModel(user, token);
+            var returnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={model.ReturnUrl}";
+            var accountLoginResponseModel = new AccountLoginResponseModel(userInfoViewModel, returnUrl);
             return accountLoginResponseModel;
         }
 
@@ -230,11 +224,9 @@ namespace SSO.API.Services
 
             if (!string.IsNullOrEmpty(token))
             {
-                var accountLoginResponseModel = new AccountLoginResponseModel();
-                var userInfoViewModel = new UserInfoViewModel(user);
-                userInfoViewModel.Token = token;
-                accountLoginResponseModel.UserInfo = userInfoViewModel;
-                accountLoginResponseModel.ReturnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={_configuration["RedirectUrl"]}";
+                var userInfoViewModel = new UserInfoViewModel(user, token);
+                var returnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={_configuration["RedirectUrl"]}";
+                var accountLoginResponseModel = new AccountLoginResponseModel(userInfoViewModel, returnUrl);
                 return accountLoginResponseModel;
             }
 

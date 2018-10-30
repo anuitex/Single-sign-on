@@ -13,10 +13,11 @@ namespace SSO.API.Models.AccountViewModels
         
         }
 
-        public UserInfoViewModel (ApplicationUser applicationUser)
+        public UserInfoViewModel (ApplicationUser applicationUser, string token = null)
         {
             Id = applicationUser.Id;
             UserName = applicationUser.UserName;
+            Token = token;
         }
     }
 }
