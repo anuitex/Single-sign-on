@@ -50,7 +50,7 @@
     <PackageReference Include="dbup-consolescripts" Version="1.3.0" />
     <PackageReference Include="Microsoft.AspNet.Identity.Owin" Version="2.2.2" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="2.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.0.1" />
@@ -62,7 +62,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.1" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="2.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="2.1.3" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="5.2.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.1" PrivateAssets="All" />
