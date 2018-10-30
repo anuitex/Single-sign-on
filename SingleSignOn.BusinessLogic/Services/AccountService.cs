@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using SingleSignOn.BusinessLogic.Interfaces;
 using SingleSignOn.Configuration;
@@ -6,7 +7,6 @@ using SingleSignOn.DataAccess.Entities;
 using SingleSignOn.DataAccess.Repositories;
 using SingleSignOn.Entities;
 using SingleSignOn.ViewModels.Account;
-using System.Threading.Tasks;
 
 namespace SingleSignOn.BusinessLogic.Services
 {
@@ -52,8 +52,7 @@ namespace SingleSignOn.BusinessLogic.Services
         {
             var forgotPasswordEmailConfiguration = new EmailConfiguration();
 
-            EmailProvider _emailProvider = new EmailProvider();
-
+            var _emailProvider = new EmailProvider();
             var emailCredential = new EmailCredential();
 
             emailCredential.DisplayName = forgotPasswordEmailConfiguration.DisplayName;
