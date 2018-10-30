@@ -6,7 +6,8 @@ namespace SingleSignOn.Middleware
     {
         public static IApplicationBuilder UseSSO(this IApplicationBuilder app, Options options)
         {
-            return app.UseMiddleware<Middleware>(options);
+            IApplicationBuilder applicationBuilder = app.UseMiddleware<Middleware>(options);
+            return applicationBuilder;
         }
     }
 }

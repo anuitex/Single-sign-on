@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 
 namespace SingleSignOn.Middleware
 {
@@ -15,11 +15,10 @@ namespace SingleSignOn.Middleware
         private readonly RequestDelegate _next;
         private readonly Options _options;
 
-        public Middleware(RequestDelegate next,
-            Options options)
+        public Middleware(RequestDelegate next, Options options)
         {
             _options = options;
-            this._next = next;
+            _next = next;
         }
 
         public async Task Invoke(HttpContext context)
@@ -36,7 +35,7 @@ namespace SingleSignOn.Middleware
             var token = context.Request.Query["token"];
             var redirectUrl = context.Request.Query["redirectUrl"];
 
-            if (String.IsNullOrEmpty(token))
+            if (string.IsNullOrEmpty(token))
             {
                 await _next(context);
                 return;
