@@ -8,6 +8,7 @@ using SSO.API.Models;
 using SSO.API.Models.AccountViewModels;
 using SSO.API.Services.Interfaces;
 using SSO.DataAccess.Entities;
+using SSO.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -184,9 +185,38 @@ namespace SSO.API.Services
             throw new NotImplementedException();
         }
 
-        public Task<IActionResult> GoogleToken()
+        public async Task<AuthenticationViewModel> GoogleToken(string token)
         {
-            throw new NotImplementedException();
+            var profileResponse = await _socialNetworksHelper.GetGoogleDetailsByToken(token);
+            var email = profileResponse.emails[0].value;
+            var userName = string.IsNullOrWhiteSpace(profileResponse.displayName.ToString())
+               ? email
+               : profileResponse.displayName.ToString();
+
+            var userProfileViewModel = new AuthenticationViewModel { Email = email, GoogleProfileId = profileResponse.id.ToString() };
+
+            if (profileResponse.name != null)
+            {
+                if (profileResponse.name.givenName != null)
+                {
+                    userProfileViewModel.FirstName = profileResponse.name.givenName;
+                }
+
+                if (profileResponse.name.familyName != null)
+                {
+                    userProfileViewModel.LastName = profileResponse.name.familyName;
+                }
+            }
+
+            if (profileResponse.image != null && profileResponse.image.url != null)
+            {
+                var imageUrl = profileResponse.image.url.ToString();
+                userProfileViewModel.PhotoUrl = imageUrl.IndexOf("?") != -1
+                    ? imageUrl.Substring(0, imageUrl.IndexOf("?"))
+                    : imageUrl;
+            }
+
+            return userProfileViewModel;
         }
 
         public List<IdentityError> GetErrors(IdentityResult result)

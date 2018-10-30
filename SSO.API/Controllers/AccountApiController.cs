@@ -134,34 +134,7 @@ namespace SSO.API.Controllers
         [Route("google-token/{token}")]
         public async Task<IActionResult> GoogleToken(string token)
         {
-            var profileResponse = await _socialNetworksHelper.GetGoogleDetailsByToken(token);
-            var email = profileResponse.emails[0].value;
-            var userName = string.IsNullOrWhiteSpace(profileResponse.displayName.ToString())
-               ? email
-               : profileResponse.displayName.ToString();
-
-            var userProfileViewModel = new AuthenticationViewModel { Email = email, GoogleProfileId = profileResponse.id.ToString() };
-
-            if (profileResponse.name != null)
-            {
-                if (profileResponse.name.givenName != null)
-                {
-                    userProfileViewModel.FirstName = profileResponse.name.givenName;
-                }
-
-                if (profileResponse.name.familyName != null)
-                {
-                    userProfileViewModel.LastName = profileResponse.name.familyName;
-                }
-            }
-
-            if (profileResponse.image != null && profileResponse.image.url != null)
-            {
-                var imageUrl = profileResponse.image.url.ToString();
-                userProfileViewModel.PhotoUrl = imageUrl.IndexOf("?") != -1
-                    ? imageUrl.Substring(0, imageUrl.IndexOf("?"))
-                    : imageUrl;
-            }
+            var userProfileViewModel = await _accountService.GoogleToken(token);
 
             var loginResult = await LoginExternal(userProfileViewModel, "google");
 
@@ -170,7 +143,7 @@ namespace SSO.API.Controllers
                 return loginResult;
             }
 
-            return await GetLoginResponse("google", email.ToString());
+            return await GetLoginResponse("google", userProfileViewModel.Email);
         }
 
         private async Task<IActionResult> GetLoginResponse(string provider, string email)

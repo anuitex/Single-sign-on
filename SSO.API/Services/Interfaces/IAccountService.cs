@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using SSO.API.Models;
 using SSO.API.Models.AccountViewModels;
 using SSO.DataAccess.Entities;
+using SSO.ViewModels;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -16,7 +17,7 @@ namespace SSO.API.Services.Interfaces
         Task<string> Register(RegisterAccountView model, IUrlHelper url, HttpRequest request);
         Task<IActionResult> GetUser();
         Task<bool> ForgotPassword(ForgotPasswordViewModel model, IUrlHelper url, HttpRequest request);
-        Task<IActionResult> GoogleToken();
+        Task<AuthenticationViewModel> GoogleToken(string token);
         List<IdentityError> GetErrors(IdentityResult result);
         string GenerateJwtToken(string email, ApplicationUser user);
     }
