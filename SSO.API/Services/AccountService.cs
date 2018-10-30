@@ -14,13 +14,8 @@ using SSO.API.Common;
 using SSO.API.Models;
 using SSO.DataAccess.Entities;
 using SSO.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
+using SSO.API.Models.AccountViewModels;
+using SSO.API.Services.Interfaces;
 
 namespace SSO.API.Services
 {
@@ -235,16 +230,12 @@ namespace SSO.API.Services
 
             if (!string.IsNullOrEmpty(token))
             {
-                return new AccountLoginResponseModel
-                {
-                    UserInfo = new UserInfoViewModel
-                    {
-                        Id = user.Id,
-                        UserName = user.UserName,
-                        token = token
-                    },
-                    ReturnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={_configuration["RedirectUrl"]}"
-                };
+                var accountLoginResponseModel = new AccountLoginResponseModel();
+                var userInfoViewModel = new UserInfoViewModel(user);
+                userInfoViewModel.Token = token;
+                accountLoginResponseModel.UserInfo = userInfoViewModel;
+                accountLoginResponseModel.ReturnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={_configuration["RedirectUrl"]}";
+                return accountLoginResponseModel;
             }
 
             throw new Exception("Cannot verify the login. Probably user profile is disabled or deleted.");
