@@ -13,8 +13,14 @@ using Microsoft.IdentityModel.Tokens;
 using SSO.API.Common;
 using SSO.API.Models;
 using SSO.DataAccess.Entities;
-using SSO.API.Services.Interfaces;
-using SSO.API.Models.AccountViewModels;
+using SSO.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace SSO.API.Services
 {
@@ -164,14 +170,44 @@ namespace SSO.API.Services
             return true;
         }
 
-        public Task<IActionResult> GetUser()
+        public async Task<ApplicationUser> GetUser(string name)
         {
-            throw new NotImplementedException();
+            var appUser = await _userManager.FindByEmailAsync(name);
+            return appUser;
         }
 
-        public Task<IActionResult> GoogleToken()
+        public async Task<AuthenticationViewModel> GoogleToken(string token)
         {
-            throw new NotImplementedException();
+            var profileResponse = await _socialNetworksHelper.GetGoogleDetailsByToken(token);
+            var email = profileResponse.emails[0].value;
+            var userName = string.IsNullOrWhiteSpace(profileResponse.displayName.ToString())
+               ? email
+               : profileResponse.displayName.ToString();
+
+            var userProfileViewModel = new AuthenticationViewModel { Email = email, GoogleProfileId = profileResponse.id.ToString() };
+
+            if (profileResponse.name != null)
+            {
+                if (profileResponse.name.givenName != null)
+                {
+                    userProfileViewModel.FirstName = profileResponse.name.givenName;
+                }
+
+                if (profileResponse.name.familyName != null)
+                {
+                    userProfileViewModel.LastName = profileResponse.name.familyName;
+                }
+            }
+
+            if (profileResponse.image != null && profileResponse.image.url != null)
+            {
+                var imageUrl = profileResponse.image.url.ToString();
+                userProfileViewModel.PhotoUrl = imageUrl.IndexOf("?") != -1
+                    ? imageUrl.Substring(0, imageUrl.IndexOf("?"))
+                    : imageUrl;
+            }
+
+            return userProfileViewModel;
         }
 
         public List<IdentityError> GetErrors(IdentityResult result)
@@ -184,6 +220,34 @@ namespace SSO.API.Services
             }
 
             return errors;
+        }
+
+        public async Task<AccountLoginResponseModel> GetLoginResponse(string provider, string email)
+        {
+            var user = await _userManager.FindByLoginAsync(provider, email);
+
+            if (user == null)
+            {
+                throw new Exception("User login info not found");
+            }
+
+            var token = GenerateJwtToken(email, user);
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                return new AccountLoginResponseModel
+                {
+                    UserInfo = new UserInfoViewModel
+                    {
+                        Id = user.Id,
+                        UserName = user.UserName,
+                        token = token
+                    },
+                    ReturnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={_configuration["RedirectUrl"]}"
+                };
+            }
+
+            throw new Exception("Cannot verify the login. Probably user profile is disabled or deleted.");
         }
 
         public string GenerateJwtToken(string email, ApplicationUser user)
