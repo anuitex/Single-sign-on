@@ -1,4 +1,3 @@
-
 namespace SingleSignOn.ViewModels.Account
 {
     public class ErrorViewModel

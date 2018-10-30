@@ -1,16 +1,14 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SingleSignOn.DataAccess.Entities;
-using SingleSignOn.WebApplication1.Services;
 using SingleSignOn.ViewModels.Account;
-using SingleSignOn.BusinessLogic.Interfaces;
+using System;
+using System.Linq;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
 
 namespace SingleSignOn.WebApplication1.Controllers
 {
@@ -23,14 +21,14 @@ namespace SingleSignOn.WebApplication1.Controllers
         private readonly ILogger _logger;
         private readonly UrlEncoder _urlEncoder;
 
-        private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
-        private const string RecoveryCodesKey = nameof(RecoveryCodesKey);
+        private const string _authenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
+        private const string _recoveryCodesKey = nameof(_recoveryCodesKey);
 
         public ManageController(
-          UserManager<ApplicationUser> userManager,
-          SignInManager<ApplicationUser> signInManager,
-          ILogger<ManageController> logger,
-          UrlEncoder urlEncoder)
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            ILogger<ManageController> logger,
+            UrlEncoder urlEncoder)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -45,6 +43,7 @@ namespace SingleSignOn.WebApplication1.Controllers
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
@@ -72,15 +71,18 @@ namespace SingleSignOn.WebApplication1.Controllers
             }
 
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
             var email = user.Email;
+
             if (model.Email != email)
             {
                 var setEmailResult = await _userManager.SetEmailAsync(user, model.Email);
+
                 if (!setEmailResult.Succeeded)
                 {
                     throw new ApplicationException($"Unexpected error occurred setting email for user with ID '{user.Id}'.");
@@ -88,9 +90,11 @@ namespace SingleSignOn.WebApplication1.Controllers
             }
 
             var phoneNumber = user.PhoneNumber;
+
             if (model.PhoneNumber != phoneNumber)
             {
                 var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, model.PhoneNumber);
+
                 if (!setPhoneResult.Succeeded)
                 {
                     throw new ApplicationException($"Unexpected error occurred setting phone number for user with ID '{user.Id}'.");
@@ -98,6 +102,7 @@ namespace SingleSignOn.WebApplication1.Controllers
             }
 
             StatusMessage = "Your profile has been updated";
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -111,6 +116,7 @@ namespace SingleSignOn.WebApplication1.Controllers
             }
 
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
@@ -120,8 +126,8 @@ namespace SingleSignOn.WebApplication1.Controllers
             var callbackUrl = Url.EmailConfirmationLink(user.Id.ToString(), code, Request.Scheme);
             var email = user.Email;
             //await _emailSender.SendEmailConfirmationAsync(email, callbackUrl);
-
             StatusMessage = "Verification email sent. Please check your email.";
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -129,18 +135,21 @@ namespace SingleSignOn.WebApplication1.Controllers
         public async Task<IActionResult> ChangePassword()
         {
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
             var hasPassword = await _userManager.HasPasswordAsync(user);
+
             if (!hasPassword)
             {
                 return RedirectToAction(nameof(SetPassword));
             }
 
             var model = new ChangePasswordViewModel { StatusMessage = StatusMessage };
+
             return View(model);
         }
 
@@ -154,15 +163,18 @@ namespace SingleSignOn.WebApplication1.Controllers
             }
 
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
             var changePasswordResult = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+
             if (!changePasswordResult.Succeeded)
             {
                 AddErrors(changePasswordResult);
+
                 return View(model);
             }
 
@@ -177,6 +189,7 @@ namespace SingleSignOn.WebApplication1.Controllers
         public async Task<IActionResult> SetPassword()
         {
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
@@ -190,6 +203,7 @@ namespace SingleSignOn.WebApplication1.Controllers
             }
 
             var model = new SetPasswordViewModel { StatusMessage = StatusMessage };
+
             return View(model);
         }
 
@@ -203,12 +217,14 @@ namespace SingleSignOn.WebApplication1.Controllers
             }
 
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
             var addPasswordResult = await _userManager.AddPasswordAsync(user, model.NewPassword);
+
             if (!addPasswordResult.Succeeded)
             {
                 AddErrors(addPasswordResult);
@@ -225,6 +241,7 @@ namespace SingleSignOn.WebApplication1.Controllers
         public async Task<IActionResult> TwoFactorAuthentication()
         {
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
@@ -244,6 +261,7 @@ namespace SingleSignOn.WebApplication1.Controllers
         public async Task<IActionResult> GenerateRecoveryCodesWarning()
         {
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
@@ -262,6 +280,7 @@ namespace SingleSignOn.WebApplication1.Controllers
         public async Task<IActionResult> GenerateRecoveryCodes()
         {
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
@@ -274,7 +293,6 @@ namespace SingleSignOn.WebApplication1.Controllers
 
             var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
             _logger.LogInformation("User with ID {UserId} has generated new 2FA recovery codes.", user.Id);
-
             var model = new ShowRecoveryCodesViewModel { RecoveryCodes = recoveryCodes.ToArray() };
 
             return View(nameof(ShowRecoveryCodes), model);
@@ -294,11 +312,13 @@ namespace SingleSignOn.WebApplication1.Controllers
         {
             var result = new StringBuilder();
             int currentPosition = 0;
+
             while (currentPosition + 4 < unformattedKey.Length)
             {
                 result.Append(unformattedKey.Substring(currentPosition, 4)).Append(" ");
                 currentPosition += 4;
             }
+
             if (currentPosition < unformattedKey.Length)
             {
                 result.Append(unformattedKey.Substring(currentPosition));
@@ -310,7 +330,7 @@ namespace SingleSignOn.WebApplication1.Controllers
         private string GenerateQrCodeUri(string email, string unformattedKey)
         {
             return string.Format(
-                AuthenticatorUriFormat,
+                _authenticatorUriFormat,
                 _urlEncoder.Encode("WebApplication1"),
                 _urlEncoder.Encode(email),
                 unformattedKey);
@@ -320,6 +340,7 @@ namespace SingleSignOn.WebApplication1.Controllers
         public async Task<IActionResult> Disable2faWarning()
         {
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
@@ -338,31 +359,36 @@ namespace SingleSignOn.WebApplication1.Controllers
         public async Task<IActionResult> Disable2fa()
         {
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
             var disable2faResult = await _userManager.SetTwoFactorEnabledAsync(user, false);
+
             if (!disable2faResult.Succeeded)
             {
                 throw new ApplicationException($"Unexpected error occured disabling 2FA for user with ID '{user.Id}'.");
             }
 
             _logger.LogInformation("User with ID {UserId} has disabled 2fa.", user.Id);
+
             return RedirectToAction(nameof(TwoFactorAuthentication));
         }
 
         [HttpGet]
         public IActionResult ShowRecoveryCodes()
         {
-            var recoveryCodes = (string[])TempData[RecoveryCodesKey];
+            var recoveryCodes = (string[])TempData[_recoveryCodesKey];
+
             if (recoveryCodes == null)
             {
                 return RedirectToAction(nameof(TwoFactorAuthentication));
             }
 
             var model = new ShowRecoveryCodesViewModel { RecoveryCodes = recoveryCodes };
+
             return View(model);
         }
 

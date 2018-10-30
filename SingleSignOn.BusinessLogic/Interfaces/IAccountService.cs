@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNet.Identity.Owin;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using SingleSignOn.DataAccess.Entities;
 using SingleSignOn.ViewModels.Account;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace SingleSignOn.BusinessLogic.Interfaces
 {

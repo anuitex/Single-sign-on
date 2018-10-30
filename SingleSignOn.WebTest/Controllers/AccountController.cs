@@ -1,17 +1,17 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using SingleSignOn.DataAccess.Entities;
-using Microsoft.Extensions.Logging;
-using SingleSignOn.ViewModels.Account;
-using SingleSignOn.BusinessLogic.Interfaces;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using SingleSignOn.BusinessLogic.Interfaces;
 using SingleSignOn.BusinessLogic.Services;
+using SingleSignOn.DataAccess.Entities;
+using SingleSignOn.ViewModels.Account;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SingleSignOn.WebTest.Controllers
 {
@@ -24,9 +24,9 @@ namespace SingleSignOn.WebTest.Controllers
         private IAccountService _accountService;
 
         public AccountController(
-                                UserManager<ApplicationUser> userManager,
-                                SignInManager<ApplicationUser> signInManager,
-                                  IAccountService accountService,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            IAccountService accountService,
             ILogger<AccountController> logger,
             IConfiguration configuration)
         {
@@ -48,8 +48,8 @@ namespace SingleSignOn.WebTest.Controllers
         public async Task<IActionResult> Login(string returnUrl = null)
         {
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-
             ViewData["ReturnUrl"] = returnUrl;
+
             return View();
         }
 
@@ -59,12 +59,15 @@ namespace SingleSignOn.WebTest.Controllers
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
+
             if (ModelState.IsValid)
             {
                 var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
+
                     return RedirectToLocal(returnUrl);
                 }
                 //if (result.RequiresTwoFactor)
@@ -79,6 +82,7 @@ namespace SingleSignOn.WebTest.Controllers
                 else
                 {
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+
                     return View(model);
                 }
             }
@@ -93,8 +97,10 @@ namespace SingleSignOn.WebTest.Controllers
             {
                 returnUrl = _configuration["RedirectUrl"];
             }
+
             var view = new RegisterAccountViewModel();
             view.ReturnUrl = returnUrl;
+
             return View(view);
         }
 
@@ -119,9 +125,10 @@ namespace SingleSignOn.WebTest.Controllers
             {
                 return RedirectToAction("ExistsUser", "Account", model);
             }
-            var result = await _accountService.Register(user, model.Password);
 
+            var result = await _accountService.Register(user, model.Password);
             var error = GetErrors(result).Select(x => x.Description).FirstOrDefault();
+
             if (error != null)
             {
                 return BadRequest(error);
@@ -139,6 +146,7 @@ namespace SingleSignOn.WebTest.Controllers
 
                 return RedirectToAction("Index", "Home", new { area = "Home" });
             }
+
             return BadRequest();
         }
 
@@ -146,6 +154,7 @@ namespace SingleSignOn.WebTest.Controllers
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
+
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
 
@@ -157,12 +166,16 @@ namespace SingleSignOn.WebTest.Controllers
             {
                 return RedirectToAction(nameof(HomeController.Index), "Home");
             }
+
             var user = await _userManager.FindByIdAsync(userId);
+
             if (user == null)
             {
                 throw new ApplicationException($"Unable to load user with ID '{userId}'.");
             }
+
             var result = await _userManager.ConfirmEmailAsync(user, code);
+
             return View(result.Succeeded ? "ConfirmEmail" : "Error");
         }
 
@@ -176,10 +189,12 @@ namespace SingleSignOn.WebTest.Controllers
         private List<IdentityError> GetErrors(IdentityResult result)
         {
             var errors = new List<IdentityError>();
+
             foreach (var error in result.Errors)
             {
                 errors.Add(error);
             }
+
             return errors;
         }
 
@@ -191,6 +206,7 @@ namespace SingleSignOn.WebTest.Controllers
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByEmailAsync(model.Email);
+
                 if (user == null /*|| !(await _userManager.IsEmailConfirmedAsync(user))*/)
                 {
                     return RedirectToAction(nameof(ForgotPasswordConfirmation));
@@ -198,7 +214,6 @@ namespace SingleSignOn.WebTest.Controllers
 
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var callbackUrl = Url.ResetPasswordCallbackLink(user.Id.ToString(), code, Request.Scheme);
-
                 await _accountService.SendEmail(model, callbackUrl);
 
                 return RedirectToAction("ForgotPasswordConfirmation", "Account");
@@ -227,7 +242,9 @@ namespace SingleSignOn.WebTest.Controllers
             {
                 throw new ApplicationException("A code must be supplied for password reset.");
             }
+
             var model = new ResetPasswordViewModel { Code = code };
+
             return View(model);
         }
 
@@ -240,17 +257,23 @@ namespace SingleSignOn.WebTest.Controllers
             {
                 return View(model);
             }
+
             var user = await _userManager.FindByEmailAsync(model.Email);
+
             if (user == null)
             {
                 return RedirectToAction(nameof(ResetPasswordConfirmation));
             }
+
             var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
+
             if (result.Succeeded)
             {
                 return RedirectToAction(nameof(ResetPasswordConfirmation));
             }
+
             AddErrors(result);
+
             return View();
         }
 

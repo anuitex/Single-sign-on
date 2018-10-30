@@ -1,17 +1,16 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using SingleSignOn.WebApplication1.Services;
-using SingleSignOn.DataAccess.Entities;
-using SingleSignOn.DataAccess;
 using SingleSignOn.BusinessLogic.Interfaces;
-using System;
-using Autofac.Extensions.DependencyInjection;
-using Autofac;
 using SingleSignOn.BusinessLogic.Services;
+using SingleSignOn.DataAccess;
+using SingleSignOn.DataAccess.Entities;
+using System;
 
 namespace SingleSignOn.WebApplication1
 {
@@ -22,10 +21,10 @@ namespace SingleSignOn.WebApplication1
             Configuration = configuration;
 
             var builder = new ConfigurationBuilder()
-        .SetBasePath(environment.ContentRootPath)
-        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-        .AddJsonFile($"appsettings.{environment.EnvironmentName}.json", optional: true)
-        .AddEnvironmentVariables();
+                .SetBasePath(environment.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{environment.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
             this.Configuration = builder.Build();
         }
 
@@ -33,8 +32,7 @@ namespace SingleSignOn.WebApplication1
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("SingleSignOn")));
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("SingleSignOn")));
 
             services.AddIdentity<ApplicationUser, ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()

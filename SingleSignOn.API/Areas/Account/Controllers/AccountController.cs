@@ -1,24 +1,22 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using SingleSignOn.BusinessLogic.Interfaces;
+using SingleSignOn.BusinessLogic.Services;
+using SingleSignOn.DataAccess.Entities;
+using SingleSignOn.ViewModels.Account;
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
-using SingleSignOn.ViewModels.Account;
-using SingleSignOn.DataAccess.Entities;
-using SingleSignOn.BusinessLogic.Interfaces;
-using SingleSignOn.BusinessLogic.Services;
-using Microsoft.Extensions.Logging;
-using SingleSignOn.API.Areas.Home;
-using SingleSignOn.Middleware;
 
 namespace SingleSignOn.API.Areas.Account.Controllers
 {
@@ -31,11 +29,11 @@ namespace SingleSignOn.API.Areas.Account.Controllers
         private readonly ILogger _logger;
 
         public AccountController(
-           UserManager<ApplicationUser> userManager,
-           SignInManager<ApplicationUser> signInManager,
-                       ILogger<AccountController> logger,
-           IAccountService accountService,
-           IConfiguration configuration)
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            ILogger<AccountController> logger,
+            IAccountService accountService,
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -49,8 +47,8 @@ namespace SingleSignOn.API.Areas.Account.Controllers
         public async Task<IActionResult> Login(string returnUrl = null)
         {
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-
             ViewData["ReturnUrl"] = returnUrl;
+
             return View();
         }
 
@@ -63,6 +61,7 @@ namespace SingleSignOn.API.Areas.Account.Controllers
             {
                 model.ReturnUrl = _configuration["RedirectUrl"];
             }
+
             if (ModelState.IsValid)
             {
                 var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, lockoutOnFailure: false);
@@ -71,13 +70,13 @@ namespace SingleSignOn.API.Areas.Account.Controllers
                 {
                     _logger.LogInformation("User logged in.");
 
-
                     return RedirectToAction("Index", "Home", new { area = "Home" });
                 }
             }
             else
             {
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+
                 return View(model);
             }
 
@@ -107,7 +106,6 @@ namespace SingleSignOn.API.Areas.Account.Controllers
 
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var callbackUrl = Url.ResetPasswordCallbackLink(user.Id, code, Request.Scheme);
-
                 await _accountService.SendEmail(model, callbackUrl);
 
                 return RedirectToAction("ForgotPasswordConfirmation", "Account");
@@ -135,6 +133,7 @@ namespace SingleSignOn.API.Areas.Account.Controllers
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
+
             return RedirectToAction(nameof(AccountController.Login));
         }
 
@@ -145,8 +144,10 @@ namespace SingleSignOn.API.Areas.Account.Controllers
             {
                 returnUrl = _configuration["RedirectUrl"];
             }
+
             var view = new RegisterAccountViewModel();
             view.ReturnUrl = returnUrl;
+
             return View(view);
         }
 
@@ -158,26 +159,28 @@ namespace SingleSignOn.API.Areas.Account.Controllers
                 UserName = model.Email,
                 Email = model.Email
             };
+
             if (String.IsNullOrEmpty(model.ReturnUrl))
             {
                 model.ReturnUrl = _configuration["RedirectUrl"];
             }
 
             AccountService _accountService = new AccountService(_configuration, _userManager);
-
             var existsUser = await _accountService.FindByName(model.Email);
 
             if (existsUser != null)
             {
                 return RedirectToAction("ExistsUser", "Account", model);
             }
-            var result = await _accountService.Register(user, model.Password);
 
+            var result = await _accountService.Register(user, model.Password);
             var error = GetErrors(result).Select(x => x.Description).FirstOrDefault();
+
             if (error != null)
             {
                 return BadRequest(error);
             }
+
             if (result.Succeeded)
             {
                 _logger.LogInformation("User created a new account with password.");
@@ -191,6 +194,7 @@ namespace SingleSignOn.API.Areas.Account.Controllers
 
                 return RedirectToAction("Index", "Home", new { area = "Home" });
             }
+
             return BadRequest();
         }
 
@@ -202,6 +206,7 @@ namespace SingleSignOn.API.Areas.Account.Controllers
 
                 return View("Register", model);
             }
+
             return View(new RegisterAccountViewModel());
         }
 
@@ -217,13 +222,13 @@ namespace SingleSignOn.API.Areas.Account.Controllers
             try
             {
                 var claims = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.UniqueName, email),
-                new Claim(JwtRegisteredClaimNames.Email, email),
-                new Claim(JwtRegisteredClaimNames.Sub, email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-            };
+                {
+                    new Claim(JwtRegisteredClaimNames.UniqueName, email),
+                    new Claim(JwtRegisteredClaimNames.Email, email),
+                    new Claim(JwtRegisteredClaimNames.Sub, email),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                };
 
                 var expires = DateTime.Now.AddDays(Convert.ToDouble(_configuration["JwtExpireDays"]));
                 var appSettings = _configuration.GetSection("AppSettings");
@@ -232,6 +237,7 @@ namespace SingleSignOn.API.Areas.Account.Controllers
                 var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key));
                 var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
                 var validIssuer = authTokenProviderOptions?["Issuer"];
+
                 var token = new JwtSecurityToken(
                     validIssuer,
                     validIssuer,
@@ -258,10 +264,12 @@ namespace SingleSignOn.API.Areas.Account.Controllers
         private List<IdentityError> GetErrors(IdentityResult result)
         {
             var errors = new List<IdentityError>();
+
             foreach (var error in result.Errors)
             {
                 errors.Add(error);
             }
+
             return errors;
         }
 
@@ -272,16 +280,21 @@ namespace SingleSignOn.API.Areas.Account.Controllers
             {
                 return Redirect("/Error/Index");
             }
+
             var user = await _userManager.FindByIdAsync(userId);
+
             if (user == null)
             {
                 return Redirect("/Error/Index");
             }
+
             var result = await _userManager.ConfirmEmailAsync(user, code);
+
             if (result.Succeeded)
             {
                 return View();
             }
+
             return Redirect("/Error/Index");
         }
 
@@ -292,7 +305,9 @@ namespace SingleSignOn.API.Areas.Account.Controllers
             {
                 return Redirect("/Error/Index");
             }
+
             var model = new ResetPasswordViewModel { Code = code };
+
             return View(model);
         }
 
@@ -304,16 +319,21 @@ namespace SingleSignOn.API.Areas.Account.Controllers
             //    return View(model);
             //}
             var user = await _userManager.FindByEmailAsync(model.Email);
+
             if (user == null)
             {
                 return Redirect("/Error/Index");
             }
+
             var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
+
             if (result.Succeeded)
             {
                 return RedirectToAction(nameof(ResetPasswordConfirmation));
             }
+
             AddErrors(result);
+
             return View();
         }
 

@@ -1,5 +1,4 @@
-﻿
-namespace SingleSignOn.ViewModels
+﻿namespace SingleSignOn.ViewModels
 {
     public class AuthenticationViewModel
     {

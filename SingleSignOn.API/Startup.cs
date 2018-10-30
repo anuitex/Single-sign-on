@@ -1,26 +1,16 @@
-﻿using System;
+﻿using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Swashbuckle.AspNetCore.Swagger;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Cors.Internal;
+using SingleSignOn.BusinessLogic.Interfaces;
+using SingleSignOn.BusinessLogic.Services;
 using SingleSignOn.DataAccess;
 using SingleSignOn.DataAccess.Entities;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using SingleSignOn.BusinessLogic.Services;
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
-using SingleSignOn.BusinessLogic.Interfaces;
-using Microsoft.AspNetCore.Authentication;
+using System;
 
 namespace SingleSignOn.API
 {
@@ -30,20 +20,19 @@ namespace SingleSignOn.API
         {
             Configuration = configuration;
 
-        //    var builder = new ConfigurationBuilder()
-        //.SetBasePath(environment.ContentRootPath)
-        //.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-        //.AddJsonFile($"appsettings.{environment.EnvironmentName}.json", optional: true)
-        //.AddEnvironmentVariables();
-        //    this.Configuration = builder.Build();
+            //    var builder = new ConfigurationBuilder()
+            //.SetBasePath(environment.ContentRootPath)
+            //.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            //.AddJsonFile($"appsettings.{environment.EnvironmentName}.json", optional: true)
+            //.AddEnvironmentVariables();
+            //    this.Configuration = builder.Build();
         }
 
         public IConfiguration Configuration { get; }
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-options.UseSqlServer(Configuration.GetConnectionString("SingleSignOn")));
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("SingleSignOn")));
 
             services.AddIdentity<ApplicationUser, ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()

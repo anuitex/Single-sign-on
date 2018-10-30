@@ -1,21 +1,19 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using SingleSignOn.DataAccess.Entities;
-using SingleSignOn.BusinessLogic.Interfaces;
-using SingleSignOn.DataAccess.Repositories;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using SingleSignOn.ViewModels.Account;
+using SingleSignOn.BusinessLogic.Interfaces;
 using SingleSignOn.Configuration;
+using SingleSignOn.DataAccess.Entities;
+using SingleSignOn.DataAccess.Repositories;
 using SingleSignOn.Entities;
-using System.Web;
-using Microsoft.AspNet.Identity.Owin;
+using SingleSignOn.ViewModels.Account;
+using System.Threading.Tasks;
 
 namespace SingleSignOn.BusinessLogic.Services
 {
     public class AccountService : IAccountService
     {
-        protected readonly UserManager<ApplicationUser> _userManager;
         private UserRepository<ApplicationUser> _userRepository;
+        protected readonly UserManager<ApplicationUser> _userManager;
         public IConfiguration _configuration;
 
         public AccountService(IConfiguration configuration, UserManager<ApplicationUser> userManager)

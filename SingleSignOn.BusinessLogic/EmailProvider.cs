@@ -1,10 +1,6 @@
 ﻿using SingleSignOn.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Mail;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SingleSignOn.BusinessLogic
@@ -25,11 +21,8 @@ namespace SingleSignOn.BusinessLogic
                 UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(emailCredential.EmailDeliveryLogin, emailCredential.EmailDeliveryPassword)
             };
-            using (var message = new MailMessage(fromAddress, toAddress)
-            {
-                Subject = subject,
-                Body = body
-            })
+
+            using (var message = new MailMessage(fromAddress, toAddress) { Subject = subject, Body = body })
             {
                 await smtp.SendMailAsync(message);
             }

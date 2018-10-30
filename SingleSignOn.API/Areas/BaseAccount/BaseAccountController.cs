@@ -14,8 +14,7 @@ namespace SingleSignOn.API.Controllers
         public BaseAccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IConfiguration configuration
-            )
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
