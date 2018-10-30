@@ -247,22 +247,20 @@ namespace SSO.API.Services
 
             if (user == null)
             {
-                var newUser = new ApplicationUser
-                {
-                    Email = model.Email,
-                    UserName = model.Email,
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    PhotoUrl = model.PhotoUrl,
-                    AvatarType = model.AvatarType,
-                    EmailConfirmed = true,
-                    FacebookProfileId = model.FacebookProfileId,
-                    GoogleProfileId = model.GoogleProfileId,
-                    VkProfileId = model.VkProfileId,
-                    TwitterProfileId = model.TwitterProfileId,
-                    RegistrationDate = DateTime.Now,
-                    AvatarSet = !String.IsNullOrWhiteSpace(model.PhotoUrl)
-                };
+                var newUser = new ApplicationUser();
+                newUser.Email = model.Email;
+                newUser.UserName = model.Email;
+                newUser.FirstName = model.FirstName;
+                newUser.LastName = model.LastName;
+                newUser.PhotoUrl = model.PhotoUrl;
+                newUser.AvatarType = model.AvatarType;
+                newUser.EmailConfirmed = true;
+                newUser.FacebookProfileId = model.FacebookProfileId;
+                newUser.GoogleProfileId = model.GoogleProfileId;
+                newUser.VkProfileId = model.VkProfileId;
+                newUser.TwitterProfileId = model.TwitterProfileId;
+                newUser.RegistrationDate = DateTime.Now;
+                newUser.AvatarSet = !string.IsNullOrWhiteSpace(model.PhotoUrl);
 
                 IdentityResult identityResult = await CreateNewUser(newUser, String.Empty, provider);
 
