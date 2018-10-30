@@ -1,0 +1,39 @@
+﻿@using SingleSignOn.ViewModels.Account;
+@model RegisterAccountViewModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <div>
+            @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { area = "API" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <input id="returnUrl" name="returnUrl" value="@Model.ReturnUrl" class="hidden" />
+                <h4>Create a new account.</h4>
+                <hr />
+                <div id="validation-errors"></div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    @Html.TextBoxFor(x => x.Email, new { @class = "form-control", id = "Email" })
+                    @Html.ValidationMessage("UserAlreadyExists", new { style = "color:red" })
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    @Html.TextBoxFor(x => x.Password, new { @class = "form-control", id = "Email" })
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm password</label>
+                    @Html.TextBoxFor(x => x.ConfirmPassword, new { @class = "form-control", id = "Email" })
+                </div>
+                <button class="btn btn-success btn-block" type="submit">Register</button>
+            }
+        </div>
+    </div>
+</div>
+

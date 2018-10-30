@@ -1,0 +1,90 @@
+﻿@using SingleSignOn.ViewModels.Account
+@using SingleSignOn.DataAccess.Entities;
+@model SingleSignOn.ViewModels.Account.LoginAccountViewModel
+
+@{
+    ViewData["Title"] = "Log in";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <section>
+            @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { area = "API" }))
+            {
+                <div>
+                    <input id="returnUrl" name="returnUrl" value="@ViewData["ReturnUrl"]" class="hidden" />
+                    <h4>Use a local account to log in.</h4>
+                    <hr />
+                    <div id="validation-errors"></div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        @Html.TextBoxFor(x => x.Email, new { @class = "form-control", id = "Email" })
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        @Html.TextBoxFor(x => x.Password, new { @class = "form-control", id = "Password" })
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-success btn-block" type="submit">Log in</button>
+                    </div>
+                    <div class="form-group">
+                        <p>
+                            @Html.ActionLink("Forgot your password?", "ForgotPassword", "Account", new { area = "Account" }, null)
+                        </p>
+                        <p>
+                            <a asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]">Register as a new user?</a>
+                        </p>
+                    </div>
+                </div>
+            }
+        </section>
+    </div>
+</div>
+
+
+@*@using SingleSignOn.ViewModels.Account;
+    @using SingleSignOn.DataAccess.Entities;
+    @model LoginAccountView
+    @{
+        ViewData["Title"] = "Log in";
+    }
+
+    <h2>@ViewData["Title"]</h2>
+
+    <div class="row">
+        <div class="col-md-4">
+            <section>
+                    @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { area = "API" }))
+                    {
+                        <div>
+                            <input id="returnUrl" name="returnUrl" value="@Model.ReturnUrl" class="hidden" />
+                            <h4>Use a local account to log in.</h4>
+                            <hr />
+                            <div id="validation-errors"></div>
+                            <div class="form-group">
+                                <label for="email"></label>
+                                @Html.TextBoxFor(x => x.Email, new { @class = "form-control", id = "Email" })
+                            </div>
+                            <div class="form-group">
+                                <label for="password"></label>
+                                @Html.TextBoxFor(x => x.Password, new { @class = "form-control", id = "Password" })
+                            </div>
+                            <div class="form-group">
+                                <button class="btn btn-success btn-block" type="submit">Log in2</button>
+                            </div>
+                            <div class="form-group">
+                                <p>
+                                    <a asp-action="ForgotPassword">Forgot your password?</a>
+                                </p>
+                                <p>
+                                    <a asp-action="Register" asp-route-returnurl="@Model.ReturnUrl">Register as a new user?</a>
+                                </p>
+                            </div>
+                        </div>
+                    }
+            </section>
+        </div>
+    </div>*@
