@@ -10,6 +10,6 @@ namespace SingleSignOn.BusinessLogic.Interfaces
         //Task<List<ApplicationUser>> GetAll();
         Task<IdentityResult> Register(ApplicationUser user, string password);
         Task<ApplicationUser> FindByName(string userEmail);
-        Task SendForgotPassEmail(EmailViewModel model, string callbackUrl);
+        Task SendForgotPassEmail(ForgotPasswordViewModel model, string callbackUrl);
     }
 }

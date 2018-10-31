@@ -6,7 +6,7 @@
         public string DisplayName = "AnuITex";
         public string EmailDeliveryLogin = "sso.test.mail.sender@gmail.com";
         public int EmailDeliveryPort = 25;
-        public string EmailDeliveryPassword = "aBCC7bGSXYgg";//"12345678Aa";
+        public string EmailDeliveryPassword = "aBCC7bGSXYgg";
         public string Subject = "New Registration Info";
         public string AdminStartBody = "A new Diamond Club member has registered. ";
         public string AdminDividerBody = "-";

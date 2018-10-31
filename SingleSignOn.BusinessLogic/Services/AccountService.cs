@@ -1,20 +1,19 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using SingleSignOn.BusinessLogic.Interfaces;
+using SingleSignOn.BusinessLogic.ResponseModels.Account;
+using SingleSignOn.BusinessLogic.ViewModels.Account;
+using SingleSignOn.Common;
 using SingleSignOn.Configuration;
 using SingleSignOn.DataAccess.Entities;
 using SingleSignOn.DataAccess.Repositories;
-using SingleSignOn.Entities;
-using SingleSignOn.Common;
-using System.Security.Claims;
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System;
-using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using System.Text;
-using SingleSignOn.BusinessLogic.ResponseModels.Account;
-using SingleSignOn.BusinessLogic.ViewModels.Account;
+using System.Threading.Tasks;
 
 namespace SingleSignOn.BusinessLogic.Services
 {
@@ -128,7 +127,7 @@ namespace SingleSignOn.BusinessLogic.Services
             return result;
         }
 
-        public async Task SendForgotPassEmail(EmailViewModel model, string callbackUrl)
+        public async Task SendForgotPassEmail(ForgotPasswordViewModel model, string callbackUrl)
         {
             var forgotPasswordEmailConfiguration = new EmailConfiguration();
 
