@@ -1,6 +1,6 @@
-﻿using System;
-using Microsoft.AspNetCore.Identity;
-namespace SingleSignOn.ViewModels
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace SingleSignOn.BusinessLogic.ViewModels.Account
 {
     public class AuthenticationViewModel : IdentityUser<int>
     {

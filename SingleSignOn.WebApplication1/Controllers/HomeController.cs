@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SingleSignOn.ViewModels.Account;
+using SingleSignOn.BusinessLogic.ViewModels.Account;
 
 namespace SingleSignOn.WebApplication1.Controllers
 {

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net47</TargetFramework>
@@ -84,6 +84,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SingleSignOn.BusinessLogic\SingleSignOn.BusinessLogic.csproj" />
+    <ProjectReference Include="..\SingleSignOn.DataAccess\SingleSignOn.DataAccess.csproj" />
+    <ProjectReference Include="..\SingleSignOn.Middleware\SingleSignOn.Middleware.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <TypeScriptCompile Include="wwwroot\js\account\login-with-2fa.ts" />
     <TypeScriptCompile Include="wwwroot\js\account\forgot-password.ts" />
     <TypeScriptCompile Include="wwwroot\js\account\login.ts" />
@@ -131,17 +137,6 @@
     <Content Update="Views\Home\Index.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\SingleSignOn.BusinessLogic\SingleSignOn.BusinessLogic.csproj" />
-    <ProjectReference Include="..\SingleSignOn.DataAccess\SingleSignOn.DataAccess.csproj" />
-    <ProjectReference Include="..\SingleSignOn.ResponseModels\SingleSignOn.ResponseModels.csproj" />
-    <ProjectReference Include="..\SingleSignOn.ViewModels\SingleSignOn.ViewModels.csproj" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
