@@ -8,7 +8,7 @@ namespace DbUp
     {
         static int Main(string[] args)
         {
-            var connectionString = args.FirstOrDefault() ?? "Server=(local);Database=SingleSignOn;Trusted_Connection=True;MultipleActiveResultSets=true";
+            var connectionString = args.FirstOrDefault() ?? "Server=(localdb)\\v11.0;Database=SingleSignOn;Trusted_Connection=True;MultipleActiveResultSets=true";
 
             var upgradeEngine = DeployChanges.To
                 .SqlDatabase(connectionString)

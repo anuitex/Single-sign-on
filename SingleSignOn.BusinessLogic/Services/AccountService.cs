@@ -133,7 +133,7 @@ namespace SingleSignOn.BusinessLogic.Services
             var forgotPasswordEmailConfiguration = new EmailConfiguration();
 
             var _emailProvider = new EmailProvider();
-            var emailCredential = new EmailCredential();
+            var emailCredential = new DataAccess.Entities.EmailCredential();
 
             emailCredential.DisplayName = forgotPasswordEmailConfiguration.DisplayName;
             emailCredential.EmailDeliverySmptServer = forgotPasswordEmailConfiguration.EmailDeliverySmptServer;
