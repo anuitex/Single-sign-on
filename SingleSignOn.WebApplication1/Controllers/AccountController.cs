@@ -253,7 +253,7 @@ namespace SingleSignOn.WebApplication1.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        public async Task<IActionResult> ForgotPassword(EmailViewModel model)
         {
             if (ModelState.IsValid)
             {

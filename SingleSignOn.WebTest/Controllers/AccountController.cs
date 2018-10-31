@@ -201,7 +201,7 @@ namespace SingleSignOn.WebTest.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        public async Task<IActionResult> ForgotPassword(EmailViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -214,7 +214,7 @@ namespace SingleSignOn.WebTest.Controllers
 
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var callbackUrl = Url.ResetPasswordCallbackLink(user.Id.ToString(), code, Request.Scheme);
-                await _accountService.SendEmail(model, callbackUrl);
+                await _accountService.SendForgotPassEmail(model, callbackUrl);
 
                 return RedirectToAction("ForgotPasswordConfirmation", "Account");
 
