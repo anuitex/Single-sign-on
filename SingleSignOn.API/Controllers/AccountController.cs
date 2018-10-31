@@ -18,7 +18,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SingleSignOn.API.Areas.Account.Controllers
+namespace SingleSignOn.API.Controllers
 {
     public class AccountController : Controller
     {
@@ -74,7 +74,7 @@ namespace SingleSignOn.API.Areas.Account.Controllers
 
             _logger.LogInformation("User logged in.");
 
-            return RedirectToAction("Index", "Home", new { area = "Home" });
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
@@ -190,7 +190,7 @@ namespace SingleSignOn.API.Areas.Account.Controllers
             await _signInManager.SignInAsync(user, isPersistent: false);
             _logger.LogInformation("User created a new account with password.");
 
-            return RedirectToAction("Index", "Home", new { area = "Home" });
+            return RedirectToAction("Index", "Home");
         }
 
         public ActionResult ExistsUser(RegisterAccountViewModel model)

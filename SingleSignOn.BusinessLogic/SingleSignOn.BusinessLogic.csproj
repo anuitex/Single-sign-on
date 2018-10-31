@@ -359,7 +359,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SingleSignOn.Common\SingleSignOn.Common.csproj">
-      <Project>{1CCB4159-0E3D-452F-AC72-160F26D47333}</Project>
+      <Project>{1ccb4159-0e3d-452f-ac72-160f26d47333}</Project>
       <Name>SingleSignOn.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\SingleSignOn.Configuration\SingleSignOn.Configuration.csproj">

@@ -15,9 +15,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Areas\Account\Controllers\AccountController.cs" />
-    <Compile Remove="Areas\BaseAccount\BaseAccountController.cs" />
-    <Compile Remove="Areas\Home\Controllers\HomeController.cs" />
+    <Compile Remove="Areas\**" />
+    <Compile Remove="Content\**" />
+    <Content Remove="Areas\**" />
+    <Content Remove="Content\**" />
+    <EmbeddedResource Remove="Areas\**" />
+    <EmbeddedResource Remove="Content\**" />
+    <None Remove="Areas\**" />
+    <None Remove="Content\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -93,40 +98,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Areas\Account\Controllers\" />
-    <Folder Include="Areas\BaseAccount\" />
-    <Folder Include="Areas\Home\Controllers\" />
-    <Folder Include="Content\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Update="Areas\Account\Views\Account\AccessDenied.cshtml">
-      <Pack>$(IncludeRazorContentInPack)</Pack>
-    </Content>
-    <Content Update="Areas\Account\Views\Account\ConfirmEmail.cshtml">
-      <Pack>$(IncludeRazorContentInPack)</Pack>
-    </Content>
-    <Content Update="Areas\Account\Views\Account\ExternalLogin.cshtml">
-      <Pack>$(IncludeRazorContentInPack)</Pack>
-    </Content>
-    <Content Update="Areas\Account\Views\Account\ForgotPassword.cshtml">
-      <Pack>$(IncludeRazorContentInPack)</Pack>
-    </Content>
-    <Content Update="Areas\Account\Views\Account\ForgotPasswordConfirmation.cshtml">
-      <Pack>$(IncludeRazorContentInPack)</Pack>
-    </Content>
-    <Content Update="Areas\Account\Views\Account\LoginWith2fa.cshtml">
-      <Pack>$(IncludeRazorContentInPack)</Pack>
-    </Content>
-    <Content Update="Areas\Account\Views\Account\LoginWithRecoveryCode.cshtml">
-      <Pack>$(IncludeRazorContentInPack)</Pack>
-    </Content>
-    <Content Update="Areas\Account\Views\Account\ResetPassword.cshtml">
-      <Pack>$(IncludeRazorContentInPack)</Pack>
-    </Content>
-    <Content Update="Areas\Account\Views\Account\ResetPasswordConfirmation.cshtml">
-      <Pack>$(IncludeRazorContentInPack)</Pack>
-    </Content>
     <Content Update="Views\Account\AccessDenied.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
