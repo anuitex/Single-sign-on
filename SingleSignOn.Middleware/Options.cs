@@ -1,5 +1,4 @@
-﻿
-namespace SingleSignOn.Middleware
+﻿namespace SingleSignOn.Middleware
 {
     public class Options
     {

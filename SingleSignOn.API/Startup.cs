@@ -16,6 +16,8 @@ namespace SingleSignOn.API
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
+
         public Startup(IHostingEnvironment environment, IConfiguration configuration)
         {
             Configuration = configuration;
@@ -28,7 +30,6 @@ namespace SingleSignOn.API
             //    this.Configuration = builder.Build();
         }
 
-        public IConfiguration Configuration { get; }
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {

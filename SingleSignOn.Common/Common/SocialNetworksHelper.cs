@@ -14,8 +14,8 @@ namespace SingleSignOn.Common
     public class SocialNetworksHelper
     {
         private readonly IConfiguration _configuration;
-        private readonly string _vkApiUrl = "https://api.vk.com/method";
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly string _vkApiUrl = "https://api.vk.com/method";
 
         private HttpContext HttpContext
         {

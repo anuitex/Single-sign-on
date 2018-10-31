@@ -1,20 +1,21 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Text;
+using System.Net.Http;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
-using SingleSignOn.BusinessLogic.Interfaces;
+using SingleSignOn.Common;
 using SingleSignOn.Configuration;
 using SingleSignOn.DataAccess.Entities;
 using SingleSignOn.DataAccess.Repositories;
-using SingleSignOn.Entities;
-using SingleSignOn.Common;
-using System.Security.Claims;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using SingleSignOn.BusinessLogic.ResponseModels.Account;
+using SingleSignOn.BusinessLogic.Interfaces;
 using SingleSignOn.BusinessLogic.ViewModels.Account;
+using SingleSignOn.BusinessLogic.ResponseModels.Account;
+using Newtonsoft.Json;
 
 namespace SingleSignOn.BusinessLogic.Services
 {
@@ -144,6 +145,7 @@ namespace SingleSignOn.BusinessLogic.Services
             await _emailProvider.SendMessage(emailCredential, forgotPasswordEmailConfiguration.Subject, forgotPasswordEmailConfiguration.ForgotPasswordBodyStart + callbackUrl + forgotPasswordEmailConfiguration.ForgotPasswordBodyEnd, model.Email);
         }
 
+
         public string GenerateJwtToken(string email, ApplicationUser user)
         {
             var claims = new List<Claim>
@@ -172,6 +174,36 @@ namespace SingleSignOn.BusinessLogic.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        //
+        // Summary:
+        // Gets an URL of image used for user's avatar for Google account
+        //
+        // Parameters:
+        //   profileId:
+        //     The Goole profile identifier.
+        //
+        // Exceptions:
+        //   T:System.ArgumentNullException:
+        //     type or value is null.
+        public async Task<string> GetGoogleAvatar(string profileId)
+        {
+            string avatarUrl = string.Empty;
+            var webClient = new HttpClient();
+            var profileUrl = $"https://www.googleapis.com/plus/v1/people/{profileId}?fields=image&key={_configuration["GoogleApiKey"].ToString()}";
+
+            dynamic response = JsonConvert.DeserializeObject<dynamic>(await webClient.GetStringAsync(profileUrl));
+
+            if (response.image != null && response.image.url != null)
+            {
+                var imageUrl = response.image.url.ToString();
+                avatarUrl = imageUrl.IndexOf("?") != -1
+                    ? imageUrl.Substring(0, imageUrl.IndexOf("?"))
+                    : imageUrl;
+            }
+
+            return avatarUrl;
         }
     }
 }
