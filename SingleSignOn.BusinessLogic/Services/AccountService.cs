@@ -6,15 +6,15 @@ using SingleSignOn.Configuration;
 using SingleSignOn.DataAccess.Entities;
 using SingleSignOn.DataAccess.Repositories;
 using SingleSignOn.Entities;
-using SingleSignOn.ViewModels.Account;
 using SingleSignOn.Common;
-using SingleSignOn.ResponseModels;
 using System.Security.Claims;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using SingleSignOn.BusinessLogic.ResponseModels.Account;
+using SingleSignOn.BusinessLogic.ViewModels.Account;
 
 namespace SingleSignOn.BusinessLogic.Services
 {

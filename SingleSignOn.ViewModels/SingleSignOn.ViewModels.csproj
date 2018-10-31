@@ -207,26 +207,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Account\ExternalLoginViewModel.cs" />
-    <Compile Include="Account\ForgotPasswordViewModel.cs" />
-    <Compile Include="Account\LoginAccountViewModel.cs" />
-    <Compile Include="Account\LoginViewModel.cs" />
-    <Compile Include="Account\LoginWith2faViewModel.cs" />
-    <Compile Include="Account\LoginWithRecoveryCodeViewModel.cs" />
-    <Compile Include="Account\RegisterAccountViewModel.cs" />
-    <Compile Include="Account\RegisterViewModel.cs" />
-    <Compile Include="Account\ResetPasswordViewModel.cs" />
-    <Compile Include="Account\AuthenticationViewModel.cs" />
-    <Compile Include="Account\ErrorViewModel.cs" />
-    <Compile Include="Account\ChangePasswordViewModel.cs" />
-    <Compile Include="Account\EnableAuthenticatorViewModel.cs" />
-    <Compile Include="Account\ExternalLoginsViewModel.cs" />
-    <Compile Include="Account\IndexViewModel.cs" />
-    <Compile Include="Account\RemoveLoginViewModel.cs" />
-    <Compile Include="Account\SetPasswordViewModel.cs" />
-    <Compile Include="Account\ShowRecoveryCodesViewModel.cs" />
-    <Compile Include="Account\TwoFactorAuthenticationViewModel.cs" />
-    <Compile Include="Account\UserInfoViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

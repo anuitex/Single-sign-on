@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 //using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace SingleSignOn.ViewModels.Account
+namespace SingleSignOn.BusinessLogic.ViewModels.Account
 {
     public class EnableAuthenticatorViewModel
     {

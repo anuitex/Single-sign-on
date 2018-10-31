@@ -41,7 +41,6 @@
   <ItemGroup>
     <ProjectReference Include="..\SingleSignOn.BusinessLogic\SingleSignOn.BusinessLogic.csproj" />
     <ProjectReference Include="..\SingleSignOn.DataAccess\SingleSignOn.DataAccess.csproj" />
-    <ProjectReference Include="..\SingleSignOn.ViewModels\SingleSignOn.ViewModels.csproj" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">

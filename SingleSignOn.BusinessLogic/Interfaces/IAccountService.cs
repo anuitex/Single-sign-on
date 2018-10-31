@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using SingleSignOn.BusinessLogic.ViewModels.Account;
 using SingleSignOn.DataAccess.Entities;
-using SingleSignOn.ViewModels.Account;
 using System.Threading.Tasks;
 
 namespace SingleSignOn.BusinessLogic.Interfaces

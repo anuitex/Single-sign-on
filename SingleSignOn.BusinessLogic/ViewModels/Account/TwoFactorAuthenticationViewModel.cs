@@ -1,4 +1,4 @@
-﻿namespace SingleSignOn.ViewModels.Account
+﻿namespace SingleSignOn.BusinessLogic.ViewModels.Account
 {
     public class TwoFactorAuthenticationViewModel
     {
