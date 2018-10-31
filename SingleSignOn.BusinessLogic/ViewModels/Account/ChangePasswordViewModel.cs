@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SingleSignOn.ViewModels.Account
+namespace SingleSignOn.BusinessLogic.ViewModels.Account
 {
     public class ChangePasswordViewModel
     {

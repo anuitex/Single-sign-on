@@ -1,6 +1,6 @@
 ﻿using SingleSignOn.BusinessLogic.ViewModels.Account;
 
-namespace SingleSignOn.ResponseModels
+namespace SingleSignOn.BusinessLogic.ResponseModels.Account
 {
     public class AccountLoginResponseModel
     {

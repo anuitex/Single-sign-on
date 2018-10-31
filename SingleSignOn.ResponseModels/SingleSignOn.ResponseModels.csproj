@@ -4,8 +4,4 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SingleSignOn.ViewModels\SingleSignOn.ViewModels.csproj" />
-  </ItemGroup>
-
 </Project>
