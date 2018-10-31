@@ -130,7 +130,6 @@ namespace SingleSignOn.BusinessLogic.Services
         public async Task SendForgotPassEmail(EmailViewModel model, string callbackUrl)
         {
             var emailConfig = new EmailConfiguration();
-
             var _emailProvider = new EmailProvider();
             var emailCredential = new EmailCredential();
 
@@ -146,7 +145,6 @@ namespace SingleSignOn.BusinessLogic.Services
         public async Task SendConfirmRegisterEmail(EmailViewModel model, string callbackUrl)
         {
             var emailConfig = new EmailConfiguration();
-
             var _emailProvider = new EmailProvider();
             var emailCredential = new EmailCredential();
 

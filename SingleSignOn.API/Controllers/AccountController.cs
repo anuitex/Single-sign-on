@@ -71,9 +71,6 @@ namespace SingleSignOn.API.Controllers
             {
                 return View(model);
             }
-
-            _logger.LogInformation("User logged in.");
-
             return RedirectToAction("Index", "Home");
         }
 
@@ -185,7 +182,7 @@ namespace SingleSignOn.API.Controllers
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
-            await _accountService.SendConfirmRegisterEmail(new EmailViewModel() { Email = model.Email}, callbackUrl);
+            await _accountService.SendConfirmRegisterEmail(new EmailViewModel() { Email = model.Email }, callbackUrl);
             //await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
 
             await _signInManager.SignInAsync(user, isPersistent: false);
