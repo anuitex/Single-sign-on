@@ -369,7 +369,7 @@
     <Compile Include="ViewModels\Account\ErrorViewModel.cs" />
     <Compile Include="ViewModels\Account\ExternalLoginsViewModel.cs" />
     <Compile Include="ViewModels\Account\ExternalLoginViewModel.cs" />
-    <Compile Include="ViewModels\Account\ForgotPasswordViewModel.cs" />
+    <Compile Include="ViewModels\Account\EmailViewModel.cs" />
     <Compile Include="ViewModels\Account\IndexViewModel.cs" />
     <Compile Include="ViewModels\Account\LoginAccountViewModel.cs" />
     <Compile Include="ViewModels\Account\LoginViewModel.cs" />
