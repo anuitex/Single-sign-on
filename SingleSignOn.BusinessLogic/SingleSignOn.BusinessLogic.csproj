@@ -410,10 +410,6 @@
       <Project>{23a5ab77-460d-4da8-95fe-e2a507e68241}</Project>
       <Name>SingleSignOn.DataAccess</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SingleSignOn.Entities\SingleSignOn.Entities.csproj">
-      <Project>{A0F347A7-0E20-4042-BD14-2AAE06FE8B83}</Project>
-      <Name>SingleSignOn.Entities</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\" />

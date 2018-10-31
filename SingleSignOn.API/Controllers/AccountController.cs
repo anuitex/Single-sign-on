@@ -71,9 +71,6 @@ namespace SingleSignOn.API.Controllers
             {
                 return View(model);
             }
-
-            _logger.LogInformation("User logged in.");
-
             return RedirectToAction("Index", "Home");
         }
 
@@ -87,7 +84,7 @@ namespace SingleSignOn.API.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        public async Task<IActionResult> ForgotPassword(EmailViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -103,7 +100,7 @@ namespace SingleSignOn.API.Controllers
 
             var code = await _userManager.GeneratePasswordResetTokenAsync(user);
             var callbackUrl = Url.ResetPasswordCallbackLink(user.Id, code, Request.Scheme);
-            await _accountService.SendEmail(model, callbackUrl);
+            await _accountService.SendForgotPassEmail(model, callbackUrl);
 
             return RedirectToAction("ForgotPasswordConfirmation", "Account");
         }
@@ -183,8 +180,9 @@ namespace SingleSignOn.API.Controllers
 
             _logger.LogInformation("User created a new account with password.");
 
-            //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            //var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
+            await _accountService.SendConfirmRegisterEmail(new EmailViewModel() { Email = model.Email }, callbackUrl);
             //await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
 
             await _signInManager.SignInAsync(user, isPersistent: false);

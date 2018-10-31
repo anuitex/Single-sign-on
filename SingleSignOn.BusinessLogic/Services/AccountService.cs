@@ -9,6 +9,9 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
 using SingleSignOn.Common;
+using SingleSignOn.BusinessLogic.ResponseModels.Account;
+using SingleSignOn.BusinessLogic.ViewModels.Account;
+using SingleSignOn.Common;
 using SingleSignOn.Configuration;
 using SingleSignOn.DataAccess.Entities;
 using SingleSignOn.DataAccess.Repositories;
@@ -129,20 +132,34 @@ namespace SingleSignOn.BusinessLogic.Services
             return result;
         }
 
-        public async Task SendEmail(ForgotPasswordViewModel model, string callbackUrl)
+        public async Task SendForgotPassEmail(EmailViewModel model, string callbackUrl)
         {
-            var forgotPasswordEmailConfiguration = new EmailConfiguration();
-
+            var emailConfig = new EmailConfiguration();
             var _emailProvider = new EmailProvider();
-            var emailCredential = new DataAccess.Entities.EmailCredential();
+            var emailCredential = new EmailCredential();
 
-            emailCredential.DisplayName = forgotPasswordEmailConfiguration.DisplayName;
-            emailCredential.EmailDeliverySmptServer = forgotPasswordEmailConfiguration.EmailDeliverySmptServer;
-            emailCredential.EmailDeliveryPort = forgotPasswordEmailConfiguration.EmailDeliveryPort;
-            emailCredential.EmailDeliveryLogin = forgotPasswordEmailConfiguration.EmailDeliveryLogin;
-            emailCredential.EmailDeliveryPassword = forgotPasswordEmailConfiguration.EmailDeliveryPassword;
+            emailCredential.DisplayName = emailConfig.DisplayName;
+            emailCredential.EmailDeliverySmptServer = emailConfig.EmailDeliverySmptServer;
+            emailCredential.EmailDeliveryPort = emailConfig.EmailDeliveryPort;
+            emailCredential.EmailDeliveryLogin = emailConfig.EmailDeliveryLogin;
+            emailCredential.EmailDeliveryPassword = emailConfig.EmailDeliveryPassword;
 
-            await _emailProvider.SendMessage(emailCredential, forgotPasswordEmailConfiguration.Subject, forgotPasswordEmailConfiguration.ForgotPasswordBodyStart + callbackUrl + forgotPasswordEmailConfiguration.ForgotPasswordBodyEnd, model.Email);
+            await _emailProvider.SendMessage(emailCredential, emailConfig.Subject, emailConfig.ForgotPasswordBodyStart + callbackUrl + emailConfig.ForgotPasswordBodyEnd, model.Email);
+        }
+
+        public async Task SendConfirmRegisterEmail(EmailViewModel model, string callbackUrl)
+        {
+            var emailConfig = new EmailConfiguration();
+            var _emailProvider = new EmailProvider();
+            var emailCredential = new EmailCredential();
+
+            emailCredential.DisplayName = emailConfig.DisplayName;
+            emailCredential.EmailDeliverySmptServer = emailConfig.EmailDeliverySmptServer;
+            emailCredential.EmailDeliveryPort = emailConfig.EmailDeliveryPort;
+            emailCredential.EmailDeliveryLogin = emailConfig.EmailDeliveryLogin;
+            emailCredential.EmailDeliveryPassword = emailConfig.EmailDeliveryPassword;
+
+            await _emailProvider.SendMessage(emailCredential, emailConfig.Subject, emailConfig.ConfirmAccountBodyStart + callbackUrl + emailConfig.ConfirmRegisterBodyEnd, model.Email);
         }
 
 
