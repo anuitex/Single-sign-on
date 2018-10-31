@@ -2,7 +2,7 @@
 
 namespace SingleSignOn.BusinessLogic.ViewModels.Account
 {
-    public class ForgotPasswordViewModel
+    public class EmailViewModel
     {
         [Required]
         [EmailAddress]

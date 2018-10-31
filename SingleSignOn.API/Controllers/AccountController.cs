@@ -87,7 +87,7 @@ namespace SingleSignOn.API.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        public async Task<IActionResult> ForgotPassword(EmailViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -185,6 +185,7 @@ namespace SingleSignOn.API.Controllers
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
+            await _accountService.SendConfirmRegisterEmail(new EmailViewModel() { Email = model.Email}, callbackUrl);
             //await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
 
             await _signInManager.SignInAsync(user, isPersistent: false);
