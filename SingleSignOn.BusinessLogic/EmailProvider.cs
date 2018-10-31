@@ -1,7 +1,8 @@
-﻿using System.Net;
+﻿using SingleSignOn.DataAccess.Entities;
+using System;
+using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
-using SingleSignOn.DataAccess.Entities;
 
 namespace SingleSignOn.BusinessLogic
 {
@@ -14,17 +15,27 @@ namespace SingleSignOn.BusinessLogic
 
             var smtp = new SmtpClient
             {
+                UseDefaultCredentials = false,
                 Host = emailCredential.EmailDeliverySmptServer,
                 Port = emailCredential.EmailDeliveryPort,
                 EnableSsl = true,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
-                UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(emailCredential.EmailDeliveryLogin, emailCredential.EmailDeliveryPassword)
             };
 
-            using (var message = new MailMessage(fromAddress, toAddress) { Subject = subject, Body = body })
+            using (var message = new MailMessage(fromAddress, toAddress))
             {
-                await smtp.SendMailAsync(message);
+                message.Subject = subject;
+                message.Body = body;
+
+                try
+                {
+                    await smtp.SendMailAsync(message);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message, ex.Data);
+                }
             }
         }
     }

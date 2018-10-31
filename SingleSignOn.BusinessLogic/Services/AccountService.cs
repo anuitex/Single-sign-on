@@ -127,7 +127,7 @@ namespace SingleSignOn.BusinessLogic.Services
             return result;
         }
 
-        public async Task SendEmail(ForgotPasswordViewModel model, string callbackUrl)
+        public async Task SendForgotPassEmail(EmailViewModel model, string callbackUrl)
         {
             var forgotPasswordEmailConfiguration = new EmailConfiguration();
 
