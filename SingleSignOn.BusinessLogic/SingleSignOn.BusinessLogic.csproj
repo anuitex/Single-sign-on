@@ -338,7 +338,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SingleSignOn.Common\SingleSignOn.Common.csproj">
-      <Project>{1CCB4159-0E3D-452F-AC72-160F26D47333}</Project>
+      <Project>{1ccb4159-0e3d-452f-ac72-160f26d47333}</Project>
       <Name>SingleSignOn.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\SingleSignOn.Configuration\SingleSignOn.Configuration.csproj">
@@ -349,12 +349,9 @@
       <Project>{23a5ab77-460d-4da8-95fe-e2a507e68241}</Project>
       <Name>SingleSignOn.DataAccess</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SingleSignOn.Entities\SingleSignOn.Entities.csproj">
-      <Project>{A0F347A7-0E20-4042-BD14-2AAE06FE8B83}</Project>
-      <Name>SingleSignOn.Entities</Name>
-    </ProjectReference>
+    
     <ProjectReference Include="..\SingleSignOn.ResponseModels\SingleSignOn.ResponseModels.csproj">
-      <Project>{68CA4D36-4383-43B6-88B8-30E95C01FE79}</Project>
+      <Project>{68ca4d36-4383-43b6-88b8-30e95c01fe79}</Project>
       <Name>SingleSignOn.ResponseModels</Name>
     </ProjectReference>
     <ProjectReference Include="..\SingleSignOn.ViewModels\SingleSignOn.ViewModels.csproj">

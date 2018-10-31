@@ -1,4 +1,4 @@
-using SingleSignOn.API.Areas.Account.Controllers;
+using SingleSignOn.API.Controllers;
 
 namespace Microsoft.AspNetCore.Mvc
 {

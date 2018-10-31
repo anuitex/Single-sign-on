@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace SingleSignOn.API.Areas.Home
+namespace SingleSignOn.API.Controllers
 {
     public class HomeController : Controller
     {

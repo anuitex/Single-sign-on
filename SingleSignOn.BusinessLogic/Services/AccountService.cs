@@ -5,7 +5,6 @@ using SingleSignOn.BusinessLogic.Interfaces;
 using SingleSignOn.Configuration;
 using SingleSignOn.DataAccess.Entities;
 using SingleSignOn.DataAccess.Repositories;
-using SingleSignOn.Entities;
 using SingleSignOn.ViewModels.Account;
 using SingleSignOn.Common;
 using SingleSignOn.ResponseModels;

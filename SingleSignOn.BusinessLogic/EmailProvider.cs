@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
-using SingleSignOn.Entities;
+using SingleSignOn.DataAccess.Entities;
 
 namespace SingleSignOn.BusinessLogic
 {
