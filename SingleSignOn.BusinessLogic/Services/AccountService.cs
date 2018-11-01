@@ -200,10 +200,6 @@ namespace SingleSignOn.BusinessLogic.Services
         // Parameters:
         //   profileId:
         //     The Goole profile identifier.
-        //
-        // Exceptions:
-        //   T:System.ArgumentNullException:
-        //     type or value is null.
         public async Task<string> GetGoogleAvatar(string profileId)
         {
             string avatarUrl = string.Empty;
@@ -211,16 +207,47 @@ namespace SingleSignOn.BusinessLogic.Services
             var profileUrl = $"https://www.googleapis.com/plus/v1/people/{profileId}?fields=image&key={_configuration["GoogleApiKey"].ToString()}";
 
             dynamic response = JsonConvert.DeserializeObject<dynamic>(await webClient.GetStringAsync(profileUrl));
+            bool isResponseImageUrlValid = ValidateGoogleAvatarResponseImageUrl(response);
 
-            if (response.image != null && response.image.url != null)
+            if (isResponseImageUrlValid == true)
             {
                 var imageUrl = response.image.url.ToString();
-                avatarUrl = imageUrl.IndexOf("?") != -1
-                    ? imageUrl.Substring(0, imageUrl.IndexOf("?"))
-                    : imageUrl;
-            }
+                avatarUrl = imageUrl;
 
+                if (imageUrl.IndexOf("?") != -1)
+                {
+                    avatarUrl = imageUrl.Substring(0, imageUrl.IndexOf("?"));
+                }
+            }
+            
             return avatarUrl;
+        }
+
+
+        //
+        // Summary:
+        // Checks if an URL of an image used for user's avatar for Google is not null
+        //
+        // Parameters:
+        //   response:
+        //     Response to request for an object with image gotten from Google API.
+        public bool ValidateGoogleAvatarResponseImageUrl (dynamic response)
+        {
+            if (response != null)
+            {
+                dynamic responseImageField = response.GetType().GetProperty("image");
+
+                if (responseImageField != null && response.image != null)
+                {
+                    dynamic responseImageUrlField = responseImageField.GetProperty("url");
+
+                    if (responseImageUrlField != null && response.image.url != null)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

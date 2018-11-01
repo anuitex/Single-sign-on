@@ -4,6 +4,10 @@ namespace SingleSignOn.BusinessLogic.ViewModels.Account
     {
         public string RequestId { get; set; }
 
-        public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+        public bool ShowRequestId()
+        {
+            var result = !string.IsNullOrEmpty(RequestId);
+            return result;
+        }
     }
 }

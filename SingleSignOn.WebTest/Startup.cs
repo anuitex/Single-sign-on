@@ -35,8 +35,8 @@ namespace SingleSignOn.WebTest
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("SingleSignOn")));
 
             services.AddIdentity<ApplicationUser, ApplicationRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+                    .AddEntityFrameworkStores<ApplicationDbContext>()
+                    .AddDefaultTokenProviders();
 
             //services.AddTransient<IEmailSender, EmailSender>();
 

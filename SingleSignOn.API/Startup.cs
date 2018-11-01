@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using System;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -10,7 +11,6 @@ using SingleSignOn.BusinessLogic.Interfaces;
 using SingleSignOn.BusinessLogic.Services;
 using SingleSignOn.DataAccess;
 using SingleSignOn.DataAccess.Entities;
-using System;
 
 namespace SingleSignOn.API
 {
