@@ -1,11 +1,13 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Owin.Security.Google;
 using SingleSignOn.BusinessLogic.Interfaces;
 using SingleSignOn.BusinessLogic.Services;
 using SingleSignOn.DataAccess;
@@ -38,10 +40,16 @@ namespace SingleSignOn.WebTest
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            services.AddAuthentication().AddGoogle(googleOptions =>
+            {
+                googleOptions.ClientId = "298569871907-einlhmd6j2uvp4reh8k0o1b0e2evitso.apps.googleusercontent.com";
+                googleOptions.ClientSecret = "YPJHD6kv7RXSco9ga48nu-JK";
+            });
+
             //services.AddTransient<IEmailSender, EmailSender>();
 
             services.AddMvc();
-
+            
             var autoFacBuilder = new ContainerBuilder();
             autoFacBuilder.RegisterType<AccountService>().As<IAccountService>();
             autoFacBuilder.Populate(services);
@@ -64,9 +72,8 @@ namespace SingleSignOn.WebTest
             }
 
             app.UseStaticFiles();
-
             app.UseAuthentication();
-
+           
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
