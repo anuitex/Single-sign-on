@@ -11,7 +11,9 @@ using SingleSignOn.DataAccess.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Web.Security;
 
 namespace SingleSignOn.WebTest.Controllers
 {
@@ -36,6 +38,9 @@ namespace SingleSignOn.WebTest.Controllers
             _accountService = accountService;
             _configuration = configuration;
         }
+
+        [TempData]
+        public string ErrorMessage { get; set; }
 
         [Authorize]
         public IActionResult Index()
@@ -305,5 +310,189 @@ namespace SingleSignOn.WebTest.Controllers
                 return RedirectToAction(nameof(HomeController.Index), "Home");
             }
         }
+        //[HttpGet]
+        //[AllowAnonymous]
+        //public async Task<IActionResult> LoginWith2fa(bool rememberMe, string returnUrl = null)
+        //{
+        //    var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+
+        //    if (user == null)
+        //    {
+        //        throw new ApplicationException($"Unable to load two-factor authentication user.");
+        //    }
+
+        //    var model = new LoginWith2faViewModel { RememberMe = rememberMe };
+        //    ViewData["ReturnUrl"] = returnUrl;
+
+        //    return View(model);
+        //}
+
+        //[HttpPost]
+        //[AllowAnonymous]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> LoginWith2fa(LoginWith2faViewModel model, bool rememberMe, string returnUrl = null)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return View(model);
+        //    }
+
+        //    var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+        //    if (user == null)
+        //    {
+        //        throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+        //    }
+
+        //    var authenticatorCode = model.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
+
+        //    var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(authenticatorCode, rememberMe, model.RememberMachine);
+
+        //    if (result.Succeeded)
+        //    {
+        //        _logger.LogInformation("User with ID {UserId} logged in with 2fa.", user.Id);
+        //        return RedirectToLocal(returnUrl);
+        //    }
+        //    else if (result.IsLockedOut)
+        //    {
+        //        _logger.LogWarning("User with ID {UserId} account locked out.", user.Id);
+        //        return RedirectToAction("LockedOut");
+        //    }
+        //    else
+        //    {
+        //        _logger.LogWarning("Invalid authenticator code entered for user with ID {UserId}.", user.Id);
+        //        ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
+        //        return View();
+        //    }
+        //}
+
+        //[HttpPost]
+        //[AllowAnonymous]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> LoginWithRecoveryCode(LoginWithRecoveryCodeViewModel model, string returnUrl = null)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return View(model);
+        //    }
+
+        //    var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+        //    if (user == null)
+        //    {
+        //        throw new ApplicationException($"Unable to load two-factor authentication user.");
+        //    }
+
+        //    var recoveryCode = model.RecoveryCode.Replace(" ", string.Empty);
+
+        //    var result = await _signInManager.TwoFactorRecoveryCodeSignInAsync(recoveryCode);
+
+        //    if (result.Succeeded)
+        //    {
+        //        _logger.LogInformation("User with ID {UserId} logged in with a recovery code.", user.Id);
+        //        return RedirectToLocal(returnUrl);
+        //    }
+        //    if (result.IsLockedOut)
+        //    {
+        //        _logger.LogWarning("User with ID {UserId} account locked out.", user.Id);
+        //        return RedirectToAction(returnUrl);
+        //    }
+        //    else
+        //    {
+        //        _logger.LogWarning("Invalid recovery code entered for user with ID {UserId}", user.Id);
+        //        ModelState.AddModelError(string.Empty, "Invalid recovery code entered.");
+        //        return View();
+        //    }
+        //}
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public IActionResult ExternalLogin(string provider, string returnUrl = null)
+        {
+            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            return Challenge(properties, provider);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+        {
+            if (remoteError != null)
+            {
+                ErrorMessage = $"Error from external provider: {remoteError}";
+                return RedirectToAction(nameof(Login));
+            }
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
+                return RedirectToLocal(returnUrl);
+            }
+            if (result.IsLockedOut)
+            {
+                return RedirectToAction(returnUrl);
+            }
+            else
+            {
+                ViewData["ReturnUrl"] = returnUrl;
+                ViewData["LoginProvider"] = info.LoginProvider;
+                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                return View("ExternalLogin", new ExternalLoginViewModel { Email = email });
+            }
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginViewModel model, string returnUrl = null)
+        {
+            if (ModelState.IsValid)
+            {
+                var info = await _signInManager.GetExternalLoginInfoAsync();
+                if (info == null)
+                {
+                    throw new ApplicationException("Error loading external login information during confirmation.");
+                }
+                var user = new ApplicationUser { UserName = model.Email, Email = model.Email};
+                Random rnd = new Random();
+
+                var password = Membership.GeneratePassword(12,3)+ rnd.Next(0,99).ToString();
+
+
+                AccountService _accountService = new AccountService(_configuration, _userManager);
+
+                var existsUser = await _accountService.FindByName(model.Email);
+
+                if (existsUser != null)
+                {
+                    return RedirectToAction("ExistsUser", "Account", model);
+                }
+
+                var result = await _accountService.Register(user, password);
+
+                //var result = await _userManager.CreateAsync(user);
+                if (result.Succeeded)
+                {
+                    result = await _userManager.AddLoginAsync(user, info);
+                    if (result.Succeeded)
+                    {
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+                        return RedirectToLocal(returnUrl);
+                    }
+                }
+                AddErrors(result);
+            }
+
+            ViewData["ReturnUrl"] = returnUrl;
+            return View(nameof(ExternalLogin), model);
+        }
+
     }
 }
