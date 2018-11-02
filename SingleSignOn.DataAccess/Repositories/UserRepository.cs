@@ -26,7 +26,7 @@ namespace SingleSignOn.DataAccess.Repositories
             }
         }
 
-        public async Task<IEnumerable<T>> Get(int id)
+        public async Task<IEnumerable<T>> Get(string id)
         {
             using (IDbConnection db = new SqlConnection(Configuration.GetConnectionString("SingleSignOn")))
             {

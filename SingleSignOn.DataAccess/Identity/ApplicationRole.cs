@@ -2,7 +2,7 @@
 
 namespace SingleSignOn.DataAccess.Entities
 {
-    public class ApplicationRole : IdentityRole<int>
+    public class ApplicationRole : IdentityRole
     {
     }
 }

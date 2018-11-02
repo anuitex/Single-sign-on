@@ -2,7 +2,7 @@
 
 namespace SingleSignOn.BusinessLogic.ViewModels.Account
 {
-    public class AuthenticationViewModel : IdentityUser<int>
+    public class AuthenticationViewModel : IdentityUser
     {
         public string Email { get; set; }
         public string GoogleProfileId { get; set; }

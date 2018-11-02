@@ -98,7 +98,7 @@ namespace SingleSignOn.WebTest.Controllers
         [HttpGet]
         public IActionResult Register(string returnUrl)
         {
-            if (String.IsNullOrEmpty(returnUrl))
+            if (string.IsNullOrEmpty(returnUrl))
             {
                 returnUrl = _configuration["RedirectUrl"];
             }
@@ -117,7 +117,7 @@ namespace SingleSignOn.WebTest.Controllers
                 UserName = model.Email,
                 Email = model.Email
             };
-            if (String.IsNullOrEmpty(model.ReturnUrl))
+            if (string.IsNullOrEmpty(model.ReturnUrl))
             {
                 model.ReturnUrl = _configuration["RedirectUrl"];
             }
@@ -219,7 +219,7 @@ namespace SingleSignOn.WebTest.Controllers
 
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var callbackUrl = Url.ResetPasswordCallbackLink(user.Id.ToString(), code, Request.Scheme);
-                await _accountService.SendForgotPassEmail(model, callbackUrl);
+                await _accountService.SendForgotPasswordEmail(model, callbackUrl);
 
                 return RedirectToAction("ForgotPasswordConfirmation", "Account");
 
@@ -408,9 +408,10 @@ namespace SingleSignOn.WebTest.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ExternalLogin(string provider, string returnUrl = null)
         {
-            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            return Challenge(properties, provider);
+            string redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
+            AuthenticationProperties properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            ChallengeResult challange = Challenge(properties, provider);
+            return challange;
         }
 
         [HttpGet]
@@ -422,13 +423,16 @@ namespace SingleSignOn.WebTest.Controllers
                 ErrorMessage = $"Error from external provider: {remoteError}";
                 return RedirectToAction(nameof(Login));
             }
+
             var info = await _signInManager.GetExternalLoginInfoAsync();
+
             if (info == null)
             {
                 return RedirectToAction(nameof(Login));
             }
 
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+
             if (result.Succeeded)
             {
                 _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
@@ -460,11 +464,8 @@ namespace SingleSignOn.WebTest.Controllers
                     throw new ApplicationException("Error loading external login information during confirmation.");
                 }
                 var user = new ApplicationUser { UserName = model.Email, Email = model.Email};
-                Random rnd = new Random();
-
+                var rnd = new Random();
                 var password = Membership.GeneratePassword(12,3)+ rnd.Next(0,99).ToString();
-
-
                 AccountService _accountService = new AccountService(_configuration, _userManager);
 
                 var existsUser = await _accountService.FindByName(model.Email);

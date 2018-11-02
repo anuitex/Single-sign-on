@@ -3,7 +3,7 @@ using System;
 
 namespace SingleSignOn.DataAccess.Entities
 {
-    public class ApplicationUser : IdentityUser<int>
+    public class ApplicationUser : IdentityUser
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }

@@ -100,7 +100,7 @@ namespace SingleSignOn.API.Controllers
 
             var code = await _userManager.GeneratePasswordResetTokenAsync(user);
             var callbackUrl = Url.ResetPasswordCallbackLink(user.Id, code, Request.Scheme);
-            await _accountService.SendForgotPassEmail(model, callbackUrl);
+            await _accountService.SendForgotPasswordEmail(model, callbackUrl);
 
             return RedirectToAction("ForgotPasswordConfirmation", "Account");
         }
