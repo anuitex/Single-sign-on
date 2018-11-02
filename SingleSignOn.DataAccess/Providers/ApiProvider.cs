@@ -9,7 +9,7 @@ namespace SingleSignOn.DataAccess.Providers
 {
     public static class ApiProvider
     {
-        public static string ServerUrl = "http://localhost:33963/ ";
+        public static string ServerUrl = "http://localhost:33963/";
 
         public static async Task<TResult> GetAsync<TResult>(string method, object viewModel = null, Action<object, DownloadStringCompletedEventArgs> callback = null)
         {

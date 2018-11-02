@@ -18,24 +18,21 @@ namespace SingleSignOn.API.Controllers
     {
         protected readonly UserManager<ApplicationUser> _userManager;
         protected readonly SignInManager<ApplicationUser> _signInManager;
-        protected readonly IEmailSender _emailSender;
+        //protected readonly IEmailSender _emailSender;
         protected readonly IConfiguration _configuration;
         //protected readonly SocialNetworksHelper _socialNetworksHelper;
         protected readonly IAccountService _accountService;
 
-        public AccountApiController(/*SocialNetworksHelper socialNetworksHelper,*/ UserManager<ApplicationUser> userManager,
-                                    SignInManager<ApplicationUser> signInManager, IEmailSender emailSender, IConfiguration configuration)
+        public AccountApiController( UserManager<ApplicationUser> userManager,SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
         {
-            _accountService = new AccountService(/*socialNetworksHelper,*/configuration, userManager/*, signInManager, emailSender*/ );
-            //_socialNetworksHelper = socialNetworksHelper;
-            _emailSender = emailSender;
+            _accountService = new AccountService(configuration, userManager);
+            
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
         }
 
-        [HttpPost]
-        [Route("Login")]
+        [HttpPost, Route("Login")]
         public async Task<IActionResult> Login([FromBody]LoginAccountViewModel model)
         {
             if (string.IsNullOrEmpty(model.ReturnUrl))
@@ -48,8 +45,9 @@ namespace SingleSignOn.API.Controllers
                 return BadRequest("Invalid model!");
             }
 
-            var result = await _accountService.Login(model, Request.Host.ToString());
+            var account = await _accountService.Login(model, Request.Host.ToString());
 
+            var result = new ApplicationUser {Email= model.Email, UserName = model.Email};
             if (result == null)
             {
                 return BadRequest("Invalid login attempt!");
@@ -58,68 +56,46 @@ namespace SingleSignOn.API.Controllers
             return Ok(result);
         }
 
-        //[HttpPost]
-        //[Route("api/account/loginWith2fa")]
-        //public async Task<IActionResult> LoginWith2fa([FromBody]LoginWith2faViewModel model)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return View(model);
-        //    }
 
-        //    try
-        //    {
-        //        var serviceResult = await _accountService.LoginWith2FA(model);
-        //        return Ok(serviceResult);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //}
-
-        [HttpPost]
-        [Route("Register")]
+        [HttpPost,Route("Register")]
         public async Task<IActionResult> Register([FromBody]RegisterAccountViewModel model)
         {
             try
             {
-                //var user = new ApplicationUser
-                //{
-                //    UserName = model.Email,
-                //    Email = model.Email
-                //};
-                //if (String.IsNullOrEmpty(model.ReturnUrl))
-                //{
-                //    model.ReturnUrl = _configuration["RedirectUrl"];
-                //}
+                var user = new ApplicationUser
+                {
+                    UserName = model.Email,
+                    Email = model.Email
+                };
+                if (String.IsNullOrEmpty(model.ReturnUrl))
+                {
+                    model.ReturnUrl = _configuration["RedirectUrl"];
+                }
 
-                //AccountService _accountService = new AccountService(_configuration, _userManager);
+                AccountService _accountService = new AccountService(_configuration, _userManager);
 
-                //var existsUser = await _accountService.FindByName(model.Email);
+                var existsUser = await _accountService.FindByName(model.Email);
 
-                //if (existsUser != null)
-                //{
-                //    return RedirectToAction("ExistsUser", "Account", model);
-                //}
+                if (existsUser != null)
+                {
+                    return BadRequest("User exist");
+                }
 
-                //var result = await _accountService.Register(user, model.Password);
+                var result = await _accountService.Register(user, model.Password);
 
-                //if (result.Succeeded != true)
-                //{
-                //    return BadRequest("User invalid");
-                //}
-                //if (result.Succeeded)
-                //{
-                //    //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                //    //var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
-                //    //await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
+                if (result.Succeeded != true)
+                {
+                    return BadRequest();
+                }
+                if (result.Succeeded)
+                {
+                    //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    //var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
+                    //await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
+                   // await _signInManager.SignInAsync(user, isPersistent: false);
 
-                //    await _signInManager.SignInAsync(user, isPersistent: false);
-                  
-
-                //    return RedirectToAction("Index", "Home", new { area = "Home" });
-                //}
+                    return Ok(user);
+                }
 
             }
             catch (Exception ex)
@@ -235,57 +211,78 @@ namespace SingleSignOn.API.Controllers
 
         //    return BadRequest("Cannot verify the login. Probably user profile is disabled or deleted.");
         //}
-        [Route("LoginExternal")]
-        private async Task<IActionResult> LoginExternal(AuthenticationViewModel model, string provider)
-        {
-            var user = await _userManager.FindByEmailAsync(model.Email) ?? await _userManager.FindByLoginAsync(provider, model.Email);
 
-            if (user == null)
-            {
-                var newUser = new ApplicationUser
-                {
-                    Email = model.Email,
-                    UserName = model.Email,
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    PhotoUrl = model.PhotoUrl,
-                    AvatarType = model.AvatarType,
-                    EmailConfirmed = true,
-                    FacebookProfileId = model.FacebookProfileId,
-                    GoogleProfileId = model.GoogleProfileId,
-                    VkProfileId = model.VkProfileId,
-                    TwitterProfileId = model.TwitterProfileId,
-                    RegistrationDate = DateTime.Now,
-                    AvatarSet = !String.IsNullOrWhiteSpace(model.PhotoUrl)
-                };
+        //[HttpPost]
+        //[Route("api/account/loginWith2fa")]
+        //public async Task<IActionResult> LoginWith2fa([FromBody]LoginWith2faViewModel model)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return View(model);
+        //    }
 
-                IdentityResult result = await CreateNewUser(newUser, String.Empty, provider);
+        //    try
+        //    {
+        //        var serviceResult = await _accountService.LoginWith2FA(model);
+        //        return Ok(serviceResult);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //}
 
-                if (!result.Succeeded)
-                {
-                    return BadRequest("Error creating user");
-                }
+        //[Route("LoginExternal")]
+        //private async Task<IActionResult> LoginExternal(AuthenticationViewModel model, string provider)
+        //{
+        //    var user = await _userManager.FindByEmailAsync(model.Email) ?? await _userManager.FindByLoginAsync(provider, model.Email);
 
-            }
+        //    if (user == null)
+        //    {
+        //        var newUser = new ApplicationUser
+        //        {
+        //            Email = model.Email,
+        //            UserName = model.Email,
+        //            FirstName = model.FirstName,
+        //            LastName = model.LastName,
+        //            PhotoUrl = model.PhotoUrl,
+        //            AvatarType = model.AvatarType,
+        //            EmailConfirmed = true,
+        //            FacebookProfileId = model.FacebookProfileId,
+        //            GoogleProfileId = model.GoogleProfileId,
+        //            VkProfileId = model.VkProfileId,
+        //            TwitterProfileId = model.TwitterProfileId,
+        //            RegistrationDate = DateTime.Now,
+        //            AvatarSet = !String.IsNullOrWhiteSpace(model.PhotoUrl)
+        //        };
 
-            var loginResult = await _signInManager.ExternalLoginSignInAsync(provider, model.Email, false);
+        //        IdentityResult result = await CreateNewUser(newUser, String.Empty, provider);
 
-            return ProcessExternalLoginResult(loginResult, model.Email);
-        }
+        //        if (!result.Succeeded)
+        //        {
+        //            return BadRequest("Error creating user");
+        //        }
 
-        //TODO: figure out proper logic for processing loginResults
-        [Route("LoginExternal")]
-        private IActionResult ProcessExternalLoginResult(Microsoft.AspNetCore.Identity.SignInResult loginResult, string email)
-        {
-            return Ok(new { loginResult, email });
-        }
+        //    }
 
-        //TODO: figure out proper logic for creating user
-        [Route("CreateNewUser")]
-        private async Task<IdentityResult> CreateNewUser(ApplicationUser newUser, string param, string provider)
-        {
-            var result = await _userManager.CreateAsync(newUser);
-            return result;
-        }
+        //    var loginResult = await _signInManager.ExternalLoginSignInAsync(provider, model.Email, false);
+
+        //    return ProcessExternalLoginResult(loginResult, model.Email);
+        //}
+
+        ////TODO: figure out proper logic for processing loginResults
+        //[Route("LoginExternal")]
+        //private IActionResult ProcessExternalLoginResult(Microsoft.AspNetCore.Identity.SignInResult loginResult, string email)
+        //{
+        //    return Ok(new { loginResult, email });
+        //}
+
+        ////TODO: figure out proper logic for creating user
+        //[Route("CreateNewUser")]
+        //private async Task<IdentityResult> CreateNewUser(ApplicationUser newUser, string param, string provider)
+        //{
+        //    var result = await _userManager.CreateAsync(newUser);
+        //    return result;
+        //}
     }
 }
