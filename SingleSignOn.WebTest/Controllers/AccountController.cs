@@ -8,6 +8,7 @@ using SingleSignOn.BusinessLogic.Interfaces;
 using SingleSignOn.BusinessLogic.Services;
 using SingleSignOn.BusinessLogic.ViewModels.Account;
 using SingleSignOn.DataAccess.Entities;
+using SingleSignOn.DataAccess.Providers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -112,6 +113,9 @@ namespace SingleSignOn.WebTest.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterAccountViewModel model)
         {
+
+            var response = ApiProvider.PostAsync<RegisterAccountViewModel, RegisterAccountViewModel>("AccountApi/Register", model);
+
             var user = new ApplicationUser
             {
                 UserName = model.Email,
@@ -310,6 +314,7 @@ namespace SingleSignOn.WebTest.Controllers
                 return RedirectToAction(nameof(HomeController.Index), "Home");
             }
         }
+
         //[HttpGet]
         //[AllowAnonymous]
         //public async Task<IActionResult> LoginWith2fa(bool rememberMe, string returnUrl = null)
@@ -472,7 +477,7 @@ namespace SingleSignOn.WebTest.Controllers
 
                 if (existsUser != null)
                 {
-                    return RedirectToAction("ExistsUser", "Account", model);
+                    return View("Error");
                 }
 
                 var result = await _accountService.Register(user, password);

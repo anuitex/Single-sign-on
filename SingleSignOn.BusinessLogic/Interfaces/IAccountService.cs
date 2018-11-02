@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using SingleSignOn.BusinessLogic.ResponseModels.Account;
 using SingleSignOn.BusinessLogic.ViewModels.Account;
 using SingleSignOn.DataAccess.Entities;
 using System.Threading.Tasks;
@@ -11,5 +12,7 @@ namespace SingleSignOn.BusinessLogic.Interfaces
         Task<IdentityResult> Register(ApplicationUser user, string password);
         Task<ApplicationUser> FindByName(string userEmail);
         Task SendForgotPasswordEmail(EmailViewModel model, string callbackUrl);
+        Task<AccountLoginResponseModel> Login(LoginAccountViewModel model, string hostNameString);
+       
     }
 }
