@@ -1,7 +1,7 @@
 /* Migration Script */
 create table Book
 (
-	[Id] [int] identity(1,1) not null constraint PK_Entry_Id primary key,
+	[Id] [nvarchar](50) identity(1,1) not null constraint PK_Entry_Id primary key,
 	[Name] [nvarchar](50) not null,
 	[Title] [nvarchar](200) not null,
 	[Summary] [nvarchar](max) not null,

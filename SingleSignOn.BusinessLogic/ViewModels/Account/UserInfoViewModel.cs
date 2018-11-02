@@ -4,7 +4,7 @@ namespace SingleSignOn.BusinessLogic.ViewModels.Account
 {
     public class UserInfoViewModel
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
         public string UserName { get; set; }
         public string Token { get; set; }
 

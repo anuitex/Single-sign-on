@@ -11,13 +11,10 @@ using Microsoft.Extensions.Configuration;
 using SingleSignOn.Common;
 using SingleSignOn.BusinessLogic.ResponseModels.Account;
 using SingleSignOn.BusinessLogic.ViewModels.Account;
-using SingleSignOn.Common;
 using SingleSignOn.Configuration;
 using SingleSignOn.DataAccess.Entities;
 using SingleSignOn.DataAccess.Repositories;
 using SingleSignOn.BusinessLogic.Interfaces;
-using SingleSignOn.BusinessLogic.ViewModels.Account;
-using SingleSignOn.BusinessLogic.ResponseModels.Account;
 using Newtonsoft.Json;
 
 namespace SingleSignOn.BusinessLogic.Services
@@ -132,7 +129,7 @@ namespace SingleSignOn.BusinessLogic.Services
             return result;
         }
 
-        public async Task SendForgotPassEmail(EmailViewModel model, string callbackUrl)
+        public async Task SendForgotPasswordEmail(EmailViewModel model, string callbackUrl)
         {
             var emailConfig = new EmailConfiguration();
             var _emailProvider = new EmailProvider();
@@ -161,7 +158,6 @@ namespace SingleSignOn.BusinessLogic.Services
 
             await _emailProvider.SendMessage(emailCredential, emailConfig.Subject, emailConfig.ConfirmAccountBodyStart + callbackUrl + emailConfig.ConfirmRegisterBodyEnd, model.Email);
         }
-
 
         public string GenerateJwtToken(string email, ApplicationUser user)
         {
@@ -222,7 +218,6 @@ namespace SingleSignOn.BusinessLogic.Services
             
             return avatarUrl;
         }
-
 
         //
         // Summary:
