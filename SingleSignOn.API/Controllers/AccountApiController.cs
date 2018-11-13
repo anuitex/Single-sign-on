@@ -23,13 +23,13 @@ namespace SingleSignOn.API.Controllers
         //protected readonly SocialNetworksHelper _socialNetworksHelper;
         protected readonly IAccountService _accountService;
 
-        public AccountApiController( UserManager<ApplicationUser> userManager,SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
+        public AccountApiController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
+                                 IAccountService accountService, IConfiguration configuration)
         {
-            _accountService = new AccountService(configuration, userManager);
-            
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            _accountService = accountService;
         }
 
         [HttpPost, Route("Login")]
@@ -40,17 +40,21 @@ namespace SingleSignOn.API.Controllers
                 model.ReturnUrl = _configuration["RedirectUrl"];
             }
 
-            if (!ModelState.IsValid)
+            //if (!ModelState.IsValid)
+            //{
+            //    return BadRequest("Invalid model!");
+            //}
+
+            var existsUser = await _accountService.FindByName(model.Email);
+
+            if (existsUser == null)
             {
-                return BadRequest("Invalid model!");
+                return null;
             }
-
-            var account = await _accountService.Login(model, Request.Host.ToString());
-
             var result = new ApplicationUser {Email= model.Email, UserName = model.Email};
             if (result == null)
             {
-                return BadRequest("Invalid login attempt!");
+                return Ok(new IdentityError());
             }
 
             return Ok(result);

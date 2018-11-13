@@ -45,7 +45,11 @@ namespace SingleSignOn.WebTest
                 googleOptions.ClientId = "298569871907-einlhmd6j2uvp4reh8k0o1b0e2evitso.apps.googleusercontent.com";
                 googleOptions.ClientSecret = "YPJHD6kv7RXSco9ga48nu-JK";
             });
-
+            //services.AddAuthentication().AddGoogle(googleOptions =>
+            //{
+            //    googleOptions.ClientId = "298569871907-einlhmd6j2uvp4reh8k0o1b0e2evitso.apps.googleusercontent.com";
+            //    googleOptions.ClientSecret = "YPJHD6kv7RXSco9ga48nu-JK";
+            //});
             //services.AddTransient<IEmailSender, EmailSender>();
 
             services.AddMvc();

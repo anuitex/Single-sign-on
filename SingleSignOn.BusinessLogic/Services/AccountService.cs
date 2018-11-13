@@ -30,6 +30,7 @@ namespace SingleSignOn.BusinessLogic.Services
 
         public AccountService(IConfiguration configuration, UserManager<ApplicationUser> userManager)
         {
+            //_signInManager = new SignInManager<ApplicationUser>(userManager,);
             _configuration = configuration;
             _userRepository = new UserRepository<ApplicationUser>(_configuration);
             _userManager = userManager;
@@ -50,8 +51,15 @@ namespace SingleSignOn.BusinessLogic.Services
 
         public async Task<ApplicationUser> FindByName(string userEmail)
         {
-            var user = await _userManager.FindByNameAsync(userEmail);
-            return user;
+            try
+            {
+                var user = await _userManager.FindByNameAsync(userEmail);
+                return user;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
 
         public async Task<AccountLoginResponseModel> Login(LoginAccountViewModel model, string hostNameString)
@@ -125,8 +133,16 @@ namespace SingleSignOn.BusinessLogic.Services
 
         public async Task<IdentityResult> Register(ApplicationUser user, string password)
         {
-            var result = await _userManager.CreateAsync(user, password);
-            return result;
+            try
+            {
+                var result = await _userManager.CreateAsync(user, password);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+            
         }
 
         public async Task SendForgotPasswordEmail(EmailViewModel model, string callbackUrl)
