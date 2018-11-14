@@ -10,6 +10,12 @@ using SingleSignOn.DataAccess.Entities;
 using SingleSignOn.BusinessLogic.Interfaces;
 using SingleSignOn.BusinessLogic.Services;
 using SingleSignOn.BusinessLogic.ViewModels.Account;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 
 namespace SingleSignOn.API.Controllers
 {
@@ -49,15 +55,17 @@ namespace SingleSignOn.API.Controllers
 
             if (existsUser == null)
             {
-                return null;
+                return Ok();
             }
+            var accountLoginResponse = await _accountService.Login(model, model.ReturnUrl);
+
             var result = new ApplicationUser {Email= model.Email, UserName = model.Email};
             if (result == null)
             {
                 return Ok(new IdentityError());
             }
-
-            return Ok(result);
+            var token = GenerateJwtToken(existsUser.Email, existsUser);
+            return Ok(token);
         }
 
 
@@ -87,6 +95,9 @@ namespace SingleSignOn.API.Controllers
 
                 var result = await _accountService.Register(user, model.Password);
 
+
+              
+
                 if (result.Succeeded != true)
                 {
                     return BadRequest();
@@ -96,9 +107,9 @@ namespace SingleSignOn.API.Controllers
                     //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     //var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
                     //await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
-                   // await _signInManager.SignInAsync(user, isPersistent: false);
-
-                    return Ok(user);
+                    // await _signInManager.SignInAsync(user, isPersistent: false);
+                    var token = GenerateJwtToken(user.Email, user);
+                    return Ok(token);
                 }
 
             }
@@ -108,21 +119,52 @@ namespace SingleSignOn.API.Controllers
             }
             return BadRequest();
         }
-
-        [Authorize]
-        [HttpGet]
-        [Route("GetUser")]
-        public async Task<IActionResult> GetUser()
+        private string GenerateJwtToken(string email, ApplicationUser user)
         {
             try
             {
-                var name = User.Claims.FirstOrDefault(x => x.Type == "unique_name")?.Value;
-                var appUser = await _userManager.FindByEmailAsync(name);
-                return Ok(appUser);
+                var claims = new List<Claim>
+                {
+                    new Claim(JwtRegisteredClaimNames.UniqueName, email),
+                    new Claim(JwtRegisteredClaimNames.Email, email),
+                    new Claim(JwtRegisteredClaimNames.Sub, email),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                };
+
+                var expires = DateTime.Now.AddDays(Convert.ToDouble(_configuration["JwtExpireDays"]));
+                var appSettings = _configuration.GetSection("AppSettings");
+                var authTokenProviderOptions = _configuration.GetSection("AuthTokenProviderOptions");
+                var key = appSettings?["JwtKey"] ?? "default_secret_key";
+                var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key));
+                var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+                var validIssuer = authTokenProviderOptions?["Issuer"];
+
+                var token = new JwtSecurityToken(
+                    validIssuer,
+                    validIssuer,
+                    claims,
+                    expires: expires,
+                    signingCredentials: creds
+                );
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity),
+                    new AuthenticationProperties
+                    {
+                        IsPersistent = true,
+                        ExpiresUtc = expires
+                    });
+
+                var result = new JwtSecurityTokenHandler().WriteToken(token);
+                return result;
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                Console.WriteLine(ex);
+                return null;
             }
         }
 
@@ -240,7 +282,6 @@ namespace SingleSignOn.API.Controllers
         //private async Task<IActionResult> LoginExternal(AuthenticationViewModel model, string provider)
         //{
         //    var user = await _userManager.FindByEmailAsync(model.Email) ?? await _userManager.FindByLoginAsync(provider, model.Email);
-
         //    if (user == null)
         //    {
         //        var newUser = new ApplicationUser

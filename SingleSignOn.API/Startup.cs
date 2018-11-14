@@ -1,12 +1,17 @@
 ﻿using System;
+using System.Text;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using SingleSignOn.BusinessLogic.Interfaces;
 using SingleSignOn.BusinessLogic.Services;
 using SingleSignOn.DataAccess;
@@ -39,8 +44,6 @@ namespace SingleSignOn.API
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-            //services.AddTransient<IEmailSender, EmailSenderService>();
-
             services.ConfigureApplicationCookie(options => options.LoginPath = "/");
 
             services.AddMvc();
@@ -50,46 +53,46 @@ namespace SingleSignOn.API
             autoFacBuilder.Populate(services);
             var container = autoFacBuilder.Build();
 
+            var appSettings = Configuration.GetSection("AppSettings");
+            var authTokenProviderOptions = Configuration.GetSection("AuthTokenProviderOptions");
+            var secretKey = appSettings?["JwtKey"] ?? "default_secret_key";
+            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey));
+            var validIssuer = authTokenProviderOptions?["Issuer"];
+
+            services.AddAuthentication(o =>
+            {
+                o.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                o.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                o.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            }).AddCookie(options =>
+            {
+                options.AccessDeniedPath = new PathString("/Areas/Account/Controllers/Account/Login/");
+                options.LoginPath = new PathString("/Areas/Account/Controllers/Account/Login/");
+                //options.LoginPath = new PathString("/Areas/Account/Controllers/Account/Login/");
+
+            });
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(o =>
+            {
+                o.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = signingKey,
+
+                    ValidateIssuer = true,
+                    ValidIssuer = validIssuer,
+
+                    ValidateAudience = true,
+                    ValidAudience = "",
+
+                    ValidateLifetime = true,
+
+                    ClockSkew = TimeSpan.Zero
+                };
+                o.RequireHttpsMetadata = false;
+            });
+
             return new AutofacServiceProvider(container);
-
-            //var appSettings = Configuration.GetSection("AppSettings");
-            //var authTokenProviderOptions = Configuration.GetSection("AuthTokenProviderOptions");
-            //var secretKey = appSettings?["JwtKey"] ?? "default_secret_key";
-            //var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey));
-            //var validIssuer = authTokenProviderOptions?["Issuer"];
-
-            //services.AddAuthentication(o =>
-            //{
-            //    o.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            //    o.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            //    o.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            //}).AddCookie(options =>
-            //{
-            //    options.AccessDeniedPath = new PathString("/Areas/Account/Controllers/Account/Login/");
-            //    options.LoginPath = new PathString("/Areas/Account/Controllers/Account/Login/");
-            //    //options.LoginPath = new PathString("/Areas/Account/Controllers/Account/Login/");
-
-            //});
-
-            //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(o =>
-            //{
-            //    o.TokenValidationParameters = new TokenValidationParameters
-            //    {
-            //        ValidateIssuerSigningKey = true,
-            //        IssuerSigningKey = signingKey,
-
-            //        ValidateIssuer = true,
-            //        ValidIssuer = validIssuer,
-
-            //        ValidateAudience = true,
-            //        ValidAudience = "",
-
-            //        ValidateLifetime = true,
-
-            //        ClockSkew = TimeSpan.Zero
-            //    };
-            //    o.RequireHttpsMetadata = false;
-            //});
 
             //services.AddDbContext<ApplicationDbContext>(options =>
             //    options.UseSqlServer(Configuration.GetConnectionString("SingleSignOn")));

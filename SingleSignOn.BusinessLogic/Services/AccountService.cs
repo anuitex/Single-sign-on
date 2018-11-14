@@ -1,27 +1,27 @@
-﻿using System;
-using System.Text;
-using System.Net.Http;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Identity;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using SingleSignOn.Common;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using SingleSignOn.BusinessLogic.Interfaces;
 using SingleSignOn.BusinessLogic.ResponseModels.Account;
 using SingleSignOn.BusinessLogic.ViewModels.Account;
+using SingleSignOn.Common;
 using SingleSignOn.Configuration;
 using SingleSignOn.DataAccess.Entities;
 using SingleSignOn.DataAccess.Repositories;
-using SingleSignOn.BusinessLogic.Interfaces;
-using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace SingleSignOn.BusinessLogic.Services
 {
     public class AccountService : IAccountService
     {
-        private UserRepository<ApplicationUser> _userRepository;
+        private readonly UserRepository<ApplicationUser> _userRepository;
         protected readonly UserManager<ApplicationUser> _userManager;
         protected readonly SignInManager<ApplicationUser> _signInManager;
         protected readonly IEmailSender _emailSender;
@@ -30,7 +30,7 @@ namespace SingleSignOn.BusinessLogic.Services
 
         public AccountService(IConfiguration configuration, UserManager<ApplicationUser> userManager)
         {
-            //_signInManager = new SignInManager<ApplicationUser>(userManager,);
+
             _configuration = configuration;
             _userRepository = new UserRepository<ApplicationUser>(_configuration);
             _userManager = userManager;
@@ -64,43 +64,52 @@ namespace SingleSignOn.BusinessLogic.Services
 
         public async Task<AccountLoginResponseModel> Login(LoginAccountViewModel model, string hostNameString)
         {
-            SignInResult result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
-            ApplicationUser user = await _userManager.FindByEmailAsync(model.Email);
-            var userInfoViewModel = new UserInfoViewModel(user);
-            var accountLoginResponseModel = new AccountLoginResponseModel();
-            string returnUrl = null;
-
-            if (!result.Succeeded)
+            try
             {
-                return null;
-            }
+                //SignInResult result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
+                ApplicationUser user = await _userManager.FindByEmailAsync(model.Email);
+                var result = await _userManager.CheckPasswordAsync(user, model.Password);
+                
+                var userInfoViewModel = new UserInfoViewModel(user);
+                var accountLoginResponseModel = new AccountLoginResponseModel();
+                string returnUrl = null;
 
-            if (result.RequiresTwoFactor)
-            {
-                string code = await _userManager.GenerateTwoFactorTokenAsync(user, "Default");
-                await _emailSender.SendEmailAsync(user.Email, "Two-factor authentication", $"There is the code for login: <input value=\"{code}\"/>");
+                if (!result)
+                {
+                    return null;
+                }
 
-                userInfoViewModel.Token = string.Empty;
-                returnUrl = $"/Account/LoginWith2fa?userId={user.Id}&returnUrl={model.ReturnUrl}";
-            }
+                //if (result.RequiresTwoFactor)
+                //{
+                //    string code = await _userManager.GenerateTwoFactorTokenAsync(user, "Default");
+                //    await _emailSender.SendEmailAsync(user.Email, "Two-factor authentication", $"There is the code for login: <input value=\"{code}\"/>");
 
-            if (!result.RequiresTwoFactor)
-            {
-                string token = GenerateJwtToken(model.Email, user);
+                //    userInfoViewModel.Token = string.Empty;
+                //    returnUrl = $"/Account/LoginWith2fa?userId={user.Id}&returnUrl={model.ReturnUrl}";
+                //}
 
-                userInfoViewModel.Token = token;
-                returnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={model.ReturnUrl}";
-            }
+                //if (!result.RequiresTwoFactor)
+                //{
+                //    string token = GenerateJwtToken(model.Email, user);
 
-            accountLoginResponseModel = new AccountLoginResponseModel(userInfoViewModel, returnUrl);
+                //    userInfoViewModel.Token = token;
+                //    returnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={model.ReturnUrl}";
+                //}
 
-            if (model.ReturnUrl.Contains(hostNameString))
-            {
-                accountLoginResponseModel.ReturnUrl = model.ReturnUrl;
+                accountLoginResponseModel = new AccountLoginResponseModel(userInfoViewModel, returnUrl);
+
+                if (model.ReturnUrl.Contains(hostNameString))
+                {
+                    accountLoginResponseModel.ReturnUrl = model.ReturnUrl;
+                    return accountLoginResponseModel;
+                }
+
                 return accountLoginResponseModel;
             }
-
-            return accountLoginResponseModel;
+            catch (Exception ex)
+            {
+                return new AccountLoginResponseModel();
+            }
         }
 
         public async Task<AccountLoginResponseModel> LoginWith2FA(LoginWith2faViewModel model)
@@ -142,7 +151,7 @@ namespace SingleSignOn.BusinessLogic.Services
             {
                 return null;
             }
-            
+
         }
 
         public async Task SendForgotPasswordEmail(EmailViewModel model, string callbackUrl)
@@ -231,7 +240,7 @@ namespace SingleSignOn.BusinessLogic.Services
                     avatarUrl = imageUrl.Substring(0, imageUrl.IndexOf("?"));
                 }
             }
-            
+
             return avatarUrl;
         }
 
@@ -242,7 +251,7 @@ namespace SingleSignOn.BusinessLogic.Services
         // Parameters:
         //   response:
         //     Response to request for an object with image gotten from Google API.
-        public bool ValidateGoogleAvatarResponseImageUrl (dynamic response)
+        public bool ValidateGoogleAvatarResponseImageUrl(dynamic response)
         {
             if (response != null)
             {

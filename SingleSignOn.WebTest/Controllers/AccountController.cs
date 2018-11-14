@@ -66,7 +66,7 @@ namespace SingleSignOn.WebTest.Controllers
         {
             if (ModelState.IsValid)
             {
-                var responseUser = ApiProvider.PostSync<LoginViewModel, LoginViewModel>("AccountApi/Login", model);
+                string token = ApiProvider.PostSync<LoginViewModel, string>("AccountApi/Login", model);
 
                 var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
@@ -214,14 +214,14 @@ namespace SingleSignOn.WebTest.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize]
         public IActionResult ForgotPasswordConfirmation()
         {
             return View();
         }
 
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize]
         public IActionResult ResetPassword(string code = null)
         {
             if (code == null)
@@ -235,7 +235,7 @@ namespace SingleSignOn.WebTest.Controllers
         }
 
         [HttpPost]
-        [AllowAnonymous]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
@@ -273,7 +273,7 @@ namespace SingleSignOn.WebTest.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize(Roles = "user")]
         public IActionResult ResetPasswordConfirmation()
         {
             return View();
@@ -361,21 +361,25 @@ namespace SingleSignOn.WebTest.Controllers
                 {
                     return View("Error");
                 }
-
-                var result = await _accountService.Register(user, password);
-
-                //var result = await _userManager.CreateAsync(user);
-                if (result.Succeeded)
+                try
                 {
-                    result = await _userManager.AddLoginAsync(user, info);
-                    if (result.Succeeded)
+                    //var result = await _accountService.Register(user, password);
+                    ApplicationUser responseUser = ApiProvider.PostSync<RegisterAccountViewModel, ApplicationUser>("AccountApi/Register", new RegisterAccountViewModel() { Email = user.Email, Password = password, ConfirmPassword = password });
+
+                    if (responseUser != null)
                     {
+                        var result = await _userManager.AddLoginAsync(user, info);
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
                         return RedirectToLocal(returnUrl);
                     }
                 }
-                AddErrors(result);
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, ex.Message);
+                    return View(nameof(ExternalLogin), model);
+                }
+               
             }
 
             ViewData["ReturnUrl"] = returnUrl;
