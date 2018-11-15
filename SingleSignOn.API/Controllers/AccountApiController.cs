@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SingleSignOn.BusinessLogic.Interfaces;
+using SingleSignOn.BusinessLogic.ResponseModels.Account;
 using SingleSignOn.BusinessLogic.ViewModels.Account;
 using SingleSignOn.DataAccess.Entities;
 using System;
@@ -28,11 +29,6 @@ namespace SingleSignOn.API.Controllers
         [HttpPost, Route("Login")]
         public async Task<IActionResult> Login([FromBody]LoginAccountViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest("Invalid model!");
-            }
-
             if (string.IsNullOrEmpty(model.ReturnUrl))
             {
                 model.ReturnUrl = _configuration["RedirectUrl"];
@@ -42,15 +38,11 @@ namespace SingleSignOn.API.Controllers
 
             if (existsUser == null)
             {
-                return Ok();
+                var incorrectUser = new AccountResponseModel() { IsOk = false, Error = "User not exist" };
+                return Ok(incorrectUser);
             }
             var accountLoginResponse = await _accountService.Login(model, model.ReturnUrl);
-
-            if (accountLoginResponse == null)
-            {
-                return Unauthorized();//  HttpStatusCode.Unauthorized;
-            }
-
+            
             return Ok(accountLoginResponse);
         }
 
@@ -75,21 +67,18 @@ namespace SingleSignOn.API.Controllers
 
                 if (existsUser != null)
                 {
-                    return BadRequest("User exist");
+                    var incorrectUser = new AccountResponseModel() {IsOk = false, Error = "User exist" };
+                    return BadRequest(incorrectUser);
                 }
 
                 var result = await _accountService.Register(user, model.Password, model.ReturnUrl);
-
-                if (result == null)
-                {
-                    return BadRequest("Registration failed =(");
-                }
-
+                
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                var incorrectUser = new AccountResponseModel() { IsOk = false, Error = ex.Message };
+                return BadRequest(incorrectUser);
             }
         }
 

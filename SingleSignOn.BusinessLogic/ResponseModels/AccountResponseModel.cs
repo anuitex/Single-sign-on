@@ -2,18 +2,23 @@
 
 namespace SingleSignOn.BusinessLogic.ResponseModels.Account
 {
-    public class AccountLoginResponseModel
+    public class AccountResponseModel
     {
         public UserInfoViewModel UserInfo { get; set; }
         public string ReturnUrl { get; set; }
+        
+        public bool IsOk { get; set; }
+        public string Error { get; set; }
 
-        public AccountLoginResponseModel()
+        public AccountResponseModel()
         { }
 
-        public AccountLoginResponseModel(UserInfoViewModel userInfoViewModel, string returnUrl)
+        public AccountResponseModel(UserInfoViewModel userInfoViewModel, string returnUrl)
         {
             UserInfo = userInfoViewModel;
             ReturnUrl = returnUrl;
+            IsOk = true;
+            Error = "";
         }
     }
 }

@@ -362,7 +362,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ResponseModels\AccountLoginResponseModel.cs" />
+    <Compile Include="ResponseModels\AccountResponseModel.cs" />
     <Compile Include="ViewModels\Account\AuthenticationViewModel.cs" />
     <Compile Include="ViewModels\Account\ChangePasswordViewModel.cs" />
     <Compile Include="ViewModels\Account\EnableAuthenticatorViewModel.cs" />
