@@ -1,6 +1,4 @@
-﻿using System;
-using System.Text;
-using Autofac;
+﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -16,6 +14,8 @@ using SingleSignOn.BusinessLogic.Interfaces;
 using SingleSignOn.BusinessLogic.Services;
 using SingleSignOn.DataAccess;
 using SingleSignOn.DataAccess.Entities;
+using System;
+using System.Text;
 
 namespace SingleSignOn.API
 {
@@ -64,10 +64,11 @@ namespace SingleSignOn.API
                 o.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 o.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 o.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            }).AddCookie(options =>
+            })
+            .AddCookie(options =>
             {
-                options.AccessDeniedPath = new PathString("/Areas/Account/Controllers/Account/Login/");
-                options.LoginPath = new PathString("/Areas/Account/Controllers/Account/Login/");
+                options.AccessDeniedPath = new PathString("/Account/Login/");
+                options.LoginPath = new PathString("/Account/Login/");
                 //options.LoginPath = new PathString("/Areas/Account/Controllers/Account/Login/");
 
             });
@@ -157,13 +158,9 @@ namespace SingleSignOn.API
 
             app.UseMvc(routes =>
             {
-                //routes.MapRoute(
-                //     name: "api",
-                //     template: "{area=Account}/{controller=Account}/{action=Login}/{id?}");
-
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Account}/{action=Login}/{id?}");
+                    template: "{controller=Home}/{action=Index}/{id?}");
             });
 
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
