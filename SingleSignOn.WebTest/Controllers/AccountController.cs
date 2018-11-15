@@ -88,7 +88,7 @@ namespace SingleSignOn.WebTest.Controllers
                 //}
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    ModelState.AddModelError(string.Empty, apiResponse.Error);
 
                     return View(model);
                 }
