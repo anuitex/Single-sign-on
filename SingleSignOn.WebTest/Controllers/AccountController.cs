@@ -11,7 +11,6 @@ using SingleSignOn.DataAccess.Entities;
 using SingleSignOn.DataAccess.Providers;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web.Security;
@@ -352,10 +351,10 @@ namespace SingleSignOn.WebTest.Controllers
                 {
                     throw new ApplicationException("Error loading external login information during confirmation.");
                 }
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email};
+                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
 
                 Random rnd = new Random();
-                var password = Membership.GeneratePassword(12,2)+ rnd.Next(0,99).ToString();
+                var password = Membership.GeneratePassword(12, 2) + rnd.Next(0, 99).ToString();
 
                 AccountService _accountService = new AccountService(_configuration, _userManager);
 
@@ -383,7 +382,7 @@ namespace SingleSignOn.WebTest.Controllers
                     _logger.LogError(ex, ex.Message);
                     return View(nameof(ExternalLogin), model);
                 }
-               
+
             }
 
             ViewData["ReturnUrl"] = returnUrl;
