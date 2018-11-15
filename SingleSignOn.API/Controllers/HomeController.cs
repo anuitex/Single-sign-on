@@ -5,7 +5,7 @@ namespace SingleSignOn.API.Controllers
 {
     public class HomeController : Controller
     {
-        [Authorize]
+        [AllowAnonymous]
         public IActionResult Index()
         {
             return View();
