@@ -1,21 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using SingleSignOn.DataAccess.Entities;
 using SingleSignOn.BusinessLogic.Interfaces;
-using SingleSignOn.BusinessLogic.Services;
 using SingleSignOn.BusinessLogic.ViewModels.Account;
-using System.Security.Claims;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
+using SingleSignOn.DataAccess.Entities;
+using System;
+using System.Threading.Tasks;
 
 namespace SingleSignOn.API.Controllers
 {
@@ -24,13 +14,10 @@ namespace SingleSignOn.API.Controllers
     {
         protected readonly UserManager<ApplicationUser> _userManager;
         protected readonly SignInManager<ApplicationUser> _signInManager;
-        //protected readonly IEmailSender _emailSender;
         protected readonly IConfiguration _configuration;
-        //protected readonly SocialNetworksHelper _socialNetworksHelper;
         protected readonly IAccountService _accountService;
 
-        public AccountApiController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
-                                 IAccountService accountService, IConfiguration configuration)
+        public AccountApiController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IAccountService accountService, IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -41,15 +28,15 @@ namespace SingleSignOn.API.Controllers
         [HttpPost, Route("Login")]
         public async Task<IActionResult> Login([FromBody]LoginAccountViewModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Invalid model!");
+            }
+
             if (string.IsNullOrEmpty(model.ReturnUrl))
             {
                 model.ReturnUrl = _configuration["RedirectUrl"];
             }
-
-            //if (!ModelState.IsValid)
-            //{
-            //    return BadRequest("Invalid model!");
-            //}
 
             var existsUser = await _accountService.FindByName(model.Email);
 
@@ -59,17 +46,16 @@ namespace SingleSignOn.API.Controllers
             }
             var accountLoginResponse = await _accountService.Login(model, model.ReturnUrl);
 
-            var result = new ApplicationUser {Email= model.Email, UserName = model.Email};
-            if (result == null)
+            if (accountLoginResponse == null)
             {
-                return Ok(new IdentityError());
+                return Unauthorized();//  HttpStatusCode.Unauthorized;
             }
-            var token = GenerateJwtToken(existsUser.Email, existsUser);
-            return Ok(token);
+
+            return Ok(accountLoginResponse);
         }
 
 
-        [HttpPost,Route("Register")]
+        [HttpPost, Route("Register")]
         public async Task<IActionResult> Register([FromBody]RegisterAccountViewModel model)
         {
             try
@@ -79,12 +65,11 @@ namespace SingleSignOn.API.Controllers
                     UserName = model.Email,
                     Email = model.Email
                 };
+
                 if (String.IsNullOrEmpty(model.ReturnUrl))
                 {
                     model.ReturnUrl = _configuration["RedirectUrl"];
                 }
-
-                AccountService _accountService = new AccountService(_configuration, _userManager);
 
                 var existsUser = await _accountService.FindByName(model.Email);
 
@@ -93,78 +78,18 @@ namespace SingleSignOn.API.Controllers
                     return BadRequest("User exist");
                 }
 
-                var result = await _accountService.Register(user, model.Password);
+                var result = await _accountService.Register(user, model.Password, model.ReturnUrl);
 
-
-              
-
-                if (result.Succeeded != true)
+                if (result == null)
                 {
-                    return BadRequest();
-                }
-                if (result.Succeeded)
-                {
-                    //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    //var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
-                    //await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
-                    // await _signInManager.SignInAsync(user, isPersistent: false);
-                    var token = GenerateJwtToken(user.Email, user);
-                    return Ok(token);
+                    return BadRequest("Registration failed =(");
                 }
 
+                return Ok(result);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
-            }
-            return BadRequest();
-        }
-        private string GenerateJwtToken(string email, ApplicationUser user)
-        {
-            try
-            {
-                var claims = new List<Claim>
-                {
-                    new Claim(JwtRegisteredClaimNames.UniqueName, email),
-                    new Claim(JwtRegisteredClaimNames.Email, email),
-                    new Claim(JwtRegisteredClaimNames.Sub, email),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-                };
-
-                var expires = DateTime.Now.AddDays(Convert.ToDouble(_configuration["JwtExpireDays"]));
-                var appSettings = _configuration.GetSection("AppSettings");
-                var authTokenProviderOptions = _configuration.GetSection("AuthTokenProviderOptions");
-                var key = appSettings?["JwtKey"] ?? "default_secret_key";
-                var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key));
-                var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-                var validIssuer = authTokenProviderOptions?["Issuer"];
-
-                var token = new JwtSecurityToken(
-                    validIssuer,
-                    validIssuer,
-                    claims,
-                    expires: expires,
-                    signingCredentials: creds
-                );
-
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity),
-                    new AuthenticationProperties
-                    {
-                        IsPersistent = true,
-                        ExpiresUtc = expires
-                    });
-
-                var result = new JwtSecurityTokenHandler().WriteToken(token);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                return null;
             }
         }
 
