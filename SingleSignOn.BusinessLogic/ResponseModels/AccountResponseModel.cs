@@ -1,4 +1,4 @@
-﻿using SingleSignOn.BusinessLogic.ViewModels.Account;
+﻿using SingleSignOn.ViewModels.Account;
 
 namespace SingleSignOn.BusinessLogic.ResponseModels.Account
 {

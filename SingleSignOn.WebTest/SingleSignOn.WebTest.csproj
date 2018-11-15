@@ -39,6 +39,7 @@
     <ProjectReference Include="..\SingleSignOn.DataAccess\SingleSignOn.DataAccess.csproj" />
     <ProjectReference Include="..\SingleSignOn.Entities\SingleSignOn.Entities.csproj" />
     <ProjectReference Include="..\SingleSignOn.Middleware\SingleSignOn.Middleware.csproj" />
+    <ProjectReference Include="..\SingleSignOn.ViewModels\SingleSignOn.ViewModels.csproj" />
   </ItemGroup>
 
   <ItemGroup>

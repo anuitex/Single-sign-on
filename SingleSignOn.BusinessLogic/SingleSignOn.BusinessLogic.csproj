@@ -362,27 +362,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ResponseModels\AccountResponseModel.cs" />
-    <Compile Include="ViewModels\Account\AuthenticationViewModel.cs" />
-    <Compile Include="ViewModels\Account\ChangePasswordViewModel.cs" />
-    <Compile Include="ViewModels\Account\EnableAuthenticatorViewModel.cs" />
-    <Compile Include="ViewModels\Account\ErrorViewModel.cs" />
-    <Compile Include="ViewModels\Account\ExternalLoginsViewModel.cs" />
-    <Compile Include="ViewModels\Account\ExternalLoginViewModel.cs" />
-    <Compile Include="ViewModels\Account\EmailViewModel.cs" />
-    <Compile Include="ViewModels\Account\IndexViewModel.cs" />
-    <Compile Include="ViewModels\Account\LoginAccountViewModel.cs" />
-    <Compile Include="ViewModels\Account\LoginViewModel.cs" />
-    <Compile Include="ViewModels\Account\LoginWith2faViewModel.cs" />
-    <Compile Include="ViewModels\Account\LoginWithRecoveryCodeViewModel.cs" />
-    <Compile Include="ViewModels\Account\RegisterAccountViewModel.cs" />
-    <Compile Include="ViewModels\Account\RegisterViewModel.cs" />
-    <Compile Include="ViewModels\Account\RemoveLoginViewModel.cs" />
-    <Compile Include="ViewModels\Account\ResetPasswordViewModel.cs" />
-    <Compile Include="ViewModels\Account\SetPasswordViewModel.cs" />
-    <Compile Include="ViewModels\Account\ShowRecoveryCodesViewModel.cs" />
-    <Compile Include="ViewModels\Account\TwoFactorAuthenticationViewModel.cs" />
-    <Compile Include="ViewModels\Account\UserInfoViewModel.cs" />
+    <Compile Include="ResponseModels\AccountLoginResponseModel.cs" />
     <Compile Include="EmailProvider.cs" />
     <Compile Include="Interfaces\IAccountService.cs" />
     <Compile Include="Interfaces\IEmailSender.cs" />
@@ -409,6 +389,10 @@
     <ProjectReference Include="..\SingleSignOn.DataAccess\SingleSignOn.DataAccess.csproj">
       <Project>{23a5ab77-460d-4da8-95fe-e2a507e68241}</Project>
       <Name>SingleSignOn.DataAccess</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SingleSignOn.ViewModels\SingleSignOn.ViewModels.csproj">
+      <Project>{667cce8b-d289-4eb6-8226-c2172d439499}</Project>
+      <Name>SingleSignOn.ViewModels</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using SingleSignOn.BusinessLogic.Interfaces;
 using SingleSignOn.BusinessLogic.ResponseModels.Account;
 using SingleSignOn.BusinessLogic.Services;
-using SingleSignOn.BusinessLogic.ViewModels.Account;
+using SingleSignOn.ViewModels.Account;
 using SingleSignOn.DataAccess.Entities;
 using SingleSignOn.DataAccess.Providers;
 using System;
