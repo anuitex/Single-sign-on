@@ -68,6 +68,8 @@ namespace SingleSignOn.WebTest.Controllers
             {
                 string token = ApiProvider.PostSync<LoginViewModel, string>("AccountApi/Login", model);
 
+                Response.Cookies.Append("Token", token);
+
                 var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
                 if (result.Succeeded)
@@ -121,6 +123,8 @@ namespace SingleSignOn.WebTest.Controllers
                 if (responseUser != null)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    Response.Cookies.Append("Token", responseUser.Email);
 
                     await _signInManager.SignInAsync(responseUser, isPersistent: false);
 
