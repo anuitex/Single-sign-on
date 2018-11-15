@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbUp", "DbUp\DbUp.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SingleSignOn.Common", "SingleSignOn.Common\SingleSignOn.Common.csproj", "{1CCB4159-0E3D-452F-AC72-160F26D47333}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SingleSignOn.ViewModels", "SingleSignOn.ViewModels\SingleSignOn.ViewModels.csproj", "{667CCE8B-D289-4EB6-8226-C2172D439499}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{1CCB4159-0E3D-452F-AC72-160F26D47333}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CCB4159-0E3D-452F-AC72-160F26D47333}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CCB4159-0E3D-452F-AC72-160F26D47333}.Release|Any CPU.Build.0 = Release|Any CPU
+		{667CCE8B-D289-4EB6-8226-C2172D439499}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{667CCE8B-D289-4EB6-8226-C2172D439499}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{667CCE8B-D289-4EB6-8226-C2172D439499}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{667CCE8B-D289-4EB6-8226-C2172D439499}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

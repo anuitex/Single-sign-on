@@ -143,7 +143,7 @@ namespace SingleSignOn.WebApplication1.Controllers
                 return View("Register", model);
             }
 
-            var result = await _accountService.Register(user, model.Password);
+            var result = await _accountService.Register(user, model.Password,"");
             var error = GetErrors(result).Select(x => x.Description).FirstOrDefault();
 
             if (error != null)

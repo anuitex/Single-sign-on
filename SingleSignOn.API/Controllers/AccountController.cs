@@ -165,13 +165,18 @@ namespace SingleSignOn.API.Controllers
                 return RedirectToAction("ExistsUser", "Account", model);
             }
 
-            var result = await _accountService.Register(user, model.Password, model.ReturnUrl);
+            //var result = await _accountService.Register(user, model.Password,"");
             //var error = GetErrors(result).Select(x => x.Description).FirstOrDefault();
-            
-            if (result != null)
-            {
-                return BadRequest();
-            }
+
+            //if (error != null)
+            //{
+            //    return BadRequest(error);
+            //}
+
+            //if (!result.Succeeded)
+            //{
+            //    return BadRequest();
+            //}
 
             _logger.LogInformation("User created a new account with password.");
 
