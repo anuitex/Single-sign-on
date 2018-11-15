@@ -8,9 +8,7 @@ namespace SingleSignOn.BusinessLogic.ResponseModels.Account
         public string ReturnUrl { get; set; }
 
         public AccountLoginResponseModel()
-        {
-
-        }
+        { }
 
         public AccountLoginResponseModel(UserInfoViewModel userInfoViewModel, string returnUrl)
         {

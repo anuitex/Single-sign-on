@@ -36,19 +36,6 @@ namespace SingleSignOn.BusinessLogic.Services
             _userManager = userManager;
         }
 
-        //public async Task<List<ApplicationUser>> GetAll()
-        //{
-        //    var userList = new List<ApplicationUser>();
-
-        //    var users = await _userRepository.GetUsers();
-
-        //    foreach (var user in users)
-        //    {
-        //        userList.Add(user);
-        //    }
-        //    return userList;
-        //}
-
         public async Task<ApplicationUser> FindByName(string userEmail)
         {
             try
@@ -66,41 +53,24 @@ namespace SingleSignOn.BusinessLogic.Services
         {
             try
             {
-                //SignInResult result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
                 ApplicationUser user = await _userManager.FindByEmailAsync(model.Email);
                 var result = await _userManager.CheckPasswordAsync(user, model.Password);
-                
-                var userInfoViewModel = new UserInfoViewModel(user);
-                var accountLoginResponseModel = new AccountLoginResponseModel();
-                string returnUrl = null;
 
                 if (!result)
                 {
                     return null;
                 }
 
-                //if (result.RequiresTwoFactor)
-                //{
-                //    string code = await _userManager.GenerateTwoFactorTokenAsync(user, "Default");
-                //    await _emailSender.SendEmailAsync(user.Email, "Two-factor authentication", $"There is the code for login: <input value=\"{code}\"/>");
+                var userInfoViewModel = new UserInfoViewModel(user);
+                string returnUrl = null;
 
-                //    userInfoViewModel.Token = string.Empty;
-                //    returnUrl = $"/Account/LoginWith2fa?userId={user.Id}&returnUrl={model.ReturnUrl}";
-                //}
-
-                //if (!result.RequiresTwoFactor)
-                //{
-                //    string token = GenerateJwtToken(model.Email, user);
-
-                //    userInfoViewModel.Token = token;
-                //    returnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={model.ReturnUrl}";
-                //}
-
-                accountLoginResponseModel = new AccountLoginResponseModel(userInfoViewModel, returnUrl);
+                var accountLoginResponseModel = new AccountLoginResponseModel(userInfoViewModel, returnUrl);
+                accountLoginResponseModel.UserInfo.Token = GenerateJwtToken(user.Email, user);
 
                 if (model.ReturnUrl.Contains(hostNameString))
                 {
                     accountLoginResponseModel.ReturnUrl = model.ReturnUrl;
+
                     return accountLoginResponseModel;
                 }
 
@@ -108,7 +78,8 @@ namespace SingleSignOn.BusinessLogic.Services
             }
             catch (Exception ex)
             {
-                return new AccountLoginResponseModel();
+                Console.WriteLine(ex.Message);
+                return null;
             }
         }
 
@@ -137,21 +108,32 @@ namespace SingleSignOn.BusinessLogic.Services
             var userInfoViewModel = new UserInfoViewModel(user, token);
             var returnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={model.ReturnUrl}";
             var accountLoginResponseModel = new AccountLoginResponseModel(userInfoViewModel, returnUrl);
+
             return accountLoginResponseModel;
         }
 
-        public async Task<IdentityResult> Register(ApplicationUser user, string password)
+        public async Task<AccountLoginResponseModel> Register(ApplicationUser user, string password, string returnUrl)
         {
             try
             {
-                var result = await _userManager.CreateAsync(user, password);
+                var createResult = await _userManager.CreateAsync(user, password);
+
+                if (!createResult.Succeeded)
+                {
+                    Console.WriteLine("Register failed for user {0}", user.Email);
+                    return null;
+                }
+
+                var token = GenerateJwtToken(user.Email, user);
+                var result = new AccountLoginResponseModel(new UserInfoViewModel(user, token), returnUrl);
+
                 return result;
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return null;
             }
-
         }
 
         public async Task SendForgotPasswordEmail(EmailViewModel model, string callbackUrl)
