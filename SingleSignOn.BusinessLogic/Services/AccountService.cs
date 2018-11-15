@@ -49,7 +49,7 @@ namespace SingleSignOn.BusinessLogic.Services
             }
         }
 
-        public async Task<AccountLoginResponseModel> Login(LoginAccountViewModel model, string hostNameString)
+        public async Task<AccountResponseModel> Login(LoginAccountViewModel model, string hostNameString)
         {
             try
             {
@@ -58,13 +58,14 @@ namespace SingleSignOn.BusinessLogic.Services
 
                 if (!result)
                 {
-                    return null;
+                    var incorrectResult = new AccountResponseModel() { IsOk = false, Error = "Wrong login or pass" };
+                    return incorrectResult;
                 }
 
                 var userInfoViewModel = new UserInfoViewModel(user);
                 string returnUrl = null;
 
-                var accountLoginResponseModel = new AccountLoginResponseModel(userInfoViewModel, returnUrl);
+                var accountLoginResponseModel = new AccountResponseModel(userInfoViewModel, returnUrl);
                 accountLoginResponseModel.UserInfo.Token = GenerateJwtToken(user.Email, user);
 
                 if (model.ReturnUrl.Contains(hostNameString))
@@ -78,12 +79,12 @@ namespace SingleSignOn.BusinessLogic.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                return null;
+                var incorrectResult = new AccountResponseModel() { IsOk = false, Error = ex.Message };
+                return incorrectResult;
             }
         }
 
-        public async Task<AccountLoginResponseModel> LoginWith2FA(LoginWith2faViewModel model)
+        public async Task<AccountResponseModel> LoginWith2FA(LoginWith2faViewModel model)
         {
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
 
@@ -107,12 +108,12 @@ namespace SingleSignOn.BusinessLogic.Services
             var token = GenerateJwtToken(user.Email, user);
             var userInfoViewModel = new UserInfoViewModel(user, token);
             var returnUrl = $"{_configuration["AuthCallback"]}?token={token}&returnUrl={model.ReturnUrl}";
-            var accountLoginResponseModel = new AccountLoginResponseModel(userInfoViewModel, returnUrl);
+            var accountLoginResponseModel = new AccountResponseModel(userInfoViewModel, returnUrl);
 
             return accountLoginResponseModel;
         }
 
-        public async Task<AccountLoginResponseModel> Register(ApplicationUser user, string password, string returnUrl)
+        public async Task<AccountResponseModel> Register(ApplicationUser user, string password, string returnUrl)
         {
             try
             {
@@ -125,7 +126,7 @@ namespace SingleSignOn.BusinessLogic.Services
                 }
 
                 var token = GenerateJwtToken(user.Email, user);
-                var result = new AccountLoginResponseModel(new UserInfoViewModel(user, token), returnUrl);
+                var result = new AccountResponseModel(new UserInfoViewModel(user, token), returnUrl);
 
                 return result;
             }
@@ -166,7 +167,7 @@ namespace SingleSignOn.BusinessLogic.Services
             await _emailProvider.SendMessage(emailCredential, emailConfig.Subject, emailConfig.ConfirmAccountBodyStart + callbackUrl + emailConfig.ConfirmRegisterBodyEnd, model.Email);
         }
 
-        public string GenerateJwtToken(string email, ApplicationUser user)
+        private string GenerateJwtToken(string email, ApplicationUser user)
         {
             var claims = new List<Claim>
             {

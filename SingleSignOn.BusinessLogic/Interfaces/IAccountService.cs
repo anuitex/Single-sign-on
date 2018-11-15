@@ -9,10 +9,10 @@ namespace SingleSignOn.BusinessLogic.Interfaces
     public interface IAccountService
     {
         //Task<List<ApplicationUser>> GetAll();
-        Task<AccountLoginResponseModel> Register(ApplicationUser user, string password, string returnUrl);
+        Task<AccountResponseModel> Register(ApplicationUser user, string password, string returnUrl);
         Task<ApplicationUser> FindByName(string userEmail);
         Task SendForgotPasswordEmail(EmailViewModel model, string callbackUrl);
-        Task<AccountLoginResponseModel> Login(LoginAccountViewModel model, string hostNameString);
+        Task<AccountResponseModel> Login(LoginAccountViewModel model, string hostNameString);
        
     }
 }

@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SingleSignOn.BusinessLogic.Interfaces;
+using SingleSignOn.BusinessLogic.ResponseModels.Account;
 using SingleSignOn.BusinessLogic.Services;
 using SingleSignOn.ViewModels.Account;
 using SingleSignOn.DataAccess.Entities;
@@ -42,40 +41,41 @@ namespace SingleSignOn.WebTest.Controllers
         [TempData]
         public string ErrorMessage { get; set; }
 
-        [Authorize]
         public IActionResult Index()
         {
             return View();
         }
 
         [HttpGet]
-        [AllowAnonymous]
         public async Task<IActionResult> Login(string returnUrl = null)
         {
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            //await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
             ViewData["ReturnUrl"] = returnUrl;
 
             return View();
         }
 
         [HttpPost]
-        [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
             if (ModelState.IsValid)
             {
-                string token = ApiProvider.PostSync<LoginViewModel, string>("AccountApi/Login", model);
+                AccountResponseModel apiResponse = ApiProvider.PostSync<LoginViewModel, AccountResponseModel>("AccountApi/Login", model);
 
-                Response.Cookies.Append("Token", token);
 
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+                //var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
-                if (result.Succeeded)
+                if (apiResponse.IsOk)
                 {
-                    _logger.LogInformation("User logged in.");
+                    if (!string.IsNullOrEmpty(apiResponse.UserInfo.Token))
+                    {
+                        Response.Cookies.Append("Token", apiResponse.UserInfo.Token);
+                        _logger.LogInformation("User logged in.");
+                        return RedirectToLocal(returnUrl);
+                    }
 
-                    return RedirectToLocal(returnUrl);
+                    return View(model);
                 }
                 //if (result.RequiresTwoFactor)
                 //{
@@ -117,17 +117,20 @@ namespace SingleSignOn.WebTest.Controllers
 
             if (ModelState.IsValid)
             {
-                ApplicationUser responseUser = ApiProvider.PostSync<RegisterAccountViewModel, ApplicationUser>("AccountApi/Register", model);
+                AccountResponseModel responseUser = ApiProvider.PostSync<RegisterAccountViewModel, AccountResponseModel>("AccountApi/Register", model);
 
-                if (responseUser != null)
+                if (responseUser.IsOk)
                 {
+
                     _logger.LogInformation("User created a new account with password.");
 
-                    Response.Cookies.Append("Token", responseUser.Email);
+                    if (!string.IsNullOrEmpty(responseUser.UserInfo.Token))
+                    {
+                        Response.Cookies.Append("Token", responseUser.UserInfo.Token);
+                        return RedirectToAction("Index", "Home", new { area = "Home" });
+                    }
 
-                    await _signInManager.SignInAsync(responseUser, isPersistent: false);
-
-                    return RedirectToAction("Index", "Home", new { area = "Home" });
+                    //await _signInManager.SignInAsync(responseUser, isPersistent: false);
                 }
             }
             else
@@ -141,14 +144,16 @@ namespace SingleSignOn.WebTest.Controllers
 
         public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
+            //await _signInManager.SignOutAsync();
+
+            Response.Cookies.Delete("Token");
+
             _logger.LogInformation("User logged out.");
 
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
 
         [HttpGet]
-        [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail(string userId, string code)
         {
             if (userId == null || code == null)
@@ -169,7 +174,6 @@ namespace SingleSignOn.WebTest.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult ForgotPassword()
         {
             return View();
@@ -188,7 +192,6 @@ namespace SingleSignOn.WebTest.Controllers
         }
 
         [HttpPost]
-        [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgotPassword(EmailViewModel model)
         {
@@ -217,14 +220,12 @@ namespace SingleSignOn.WebTest.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public IActionResult ForgotPasswordConfirmation()
         {
             return View();
         }
 
         [HttpGet]
-        [Authorize]
         public IActionResult ResetPassword(string code = null)
         {
             if (code == null)
@@ -238,7 +239,6 @@ namespace SingleSignOn.WebTest.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
@@ -276,7 +276,6 @@ namespace SingleSignOn.WebTest.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "user")]
         public IActionResult ResetPasswordConfirmation()
         {
             return View();
@@ -296,7 +295,6 @@ namespace SingleSignOn.WebTest.Controllers
         }
 
         [HttpPost]
-        [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public IActionResult ExternalLogin(string provider, string returnUrl = null)
         {
@@ -306,7 +304,6 @@ namespace SingleSignOn.WebTest.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
         public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
         {
             if (remoteError != null)
@@ -340,7 +337,6 @@ namespace SingleSignOn.WebTest.Controllers
         }
 
         [HttpPost]
-        [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginViewModel model, string returnUrl = null)
         {
