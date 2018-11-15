@@ -358,7 +358,7 @@ namespace SingleSignOn.WebTest.Controllers
 
                 if (existsUser != null)
                 {
-                    return View("Error");
+                    return View("Error", "something went wrong");
                 }
                 try
                 {
