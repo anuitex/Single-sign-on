@@ -1,7 +1,7 @@
 ﻿using SingleSignOn.DataAccess.Entities;
 using SingleSignOn.ViewModels.Account;
 
-namespace SingleSignOn.BusinessLogic.ViewModels.Account
+namespace SingleSignOn.ViewModels.Account
 {
     public class UserInfoViewModel
     {

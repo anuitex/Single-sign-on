@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using SingleSignOn.BusinessLogic.Interfaces;
 using SingleSignOn.BusinessLogic.Services;
-using SingleSignOn.BusinessLogic.ViewModels.Account;
+using SingleSignOn.ViewModels.Account;
 using SingleSignOn.DataAccess.Entities;
 using System;
 using System.Collections.Generic;

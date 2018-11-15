@@ -4,7 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using SingleSignOn.BusinessLogic.Interfaces;
 using SingleSignOn.BusinessLogic.ResponseModels.Account;
-using SingleSignOn.BusinessLogic.ViewModels.Account;
+using SingleSignOn.ViewModels.Account;
 using SingleSignOn.Common;
 using SingleSignOn.Configuration;
 using SingleSignOn.DataAccess.Entities;
