@@ -6,6 +6,7 @@ using SingleSignOn.ViewModels.Account;
 using SingleSignOn.DataAccess.Entities;
 using System;
 using System.Threading.Tasks;
+using SingleSignOn.BusinessLogic.ResponseModels.Account;
 
 namespace SingleSignOn.API.Controllers
 {

@@ -362,11 +362,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ResponseModels\AccountLoginResponseModel.cs" />
     <Compile Include="EmailProvider.cs" />
     <Compile Include="Interfaces\IAccountService.cs" />
     <Compile Include="Interfaces\IEmailSender.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResponseModels\AccountResponseModel.cs" />
     <Compile Include="Services\AccountService.cs" />
   </ItemGroup>
   <ItemGroup>
