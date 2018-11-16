@@ -13,6 +13,6 @@ namespace SingleSignOn.BusinessLogic.Interfaces
         Task<ApplicationUser> FindByName(string userEmail);
         Task SendForgotPasswordEmail(EmailViewModel model, string callbackUrl);
         Task<AccountResponseModel> Login(LoginAccountViewModel model, string hostNameString);
-       
+        Task SendConfirmRegisterEmail(EmailViewModel email, string callBackUrl);
     }
 }

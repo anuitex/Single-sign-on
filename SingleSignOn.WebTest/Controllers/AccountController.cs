@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web.Security;
+using Microsoft.AspNetCore.Authentication;
 
 namespace SingleSignOn.WebTest.Controllers
 {
@@ -49,7 +50,7 @@ namespace SingleSignOn.WebTest.Controllers
         [HttpGet]
         public async Task<IActionResult> Login(string returnUrl = null)
         {
-            //await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
             ViewData["ReturnUrl"] = returnUrl;
 
             return View();
@@ -62,9 +63,8 @@ namespace SingleSignOn.WebTest.Controllers
             if (ModelState.IsValid)
             {
                 AccountResponseModel apiResponse = ApiProvider.PostSync<LoginViewModel, AccountResponseModel>("AccountApi/Login", model);
-
-
-                //var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+                
+                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
                 if (apiResponse.IsOk)
                 {
@@ -130,48 +130,48 @@ namespace SingleSignOn.WebTest.Controllers
                         return RedirectToAction("Index", "Home", new { area = "Home" });
                     }
 
-                    //await _signInManager.SignInAsync(responseUser, isPersistent: false);
+                    var newUser = new ApplicationUser() { Email = responseUser.UserInfo.Email};
+                    await _signInManager.SignInAsync(newUser, isPersistent: false);
                 }
             }
             else
             {
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                ModelState.AddModelError(string.Empty, "Invalid register attempt.");
 
                 return View(model);
             }
-            return BadRequest("Invalid user");
+
+            return BadRequest("Something went wrong");
         }
 
         public async Task<IActionResult> Logout()
         {
-            //await _signInManager.SignOutAsync();
-
+            await _signInManager.SignOutAsync();
             Response.Cookies.Delete("Token");
-
             _logger.LogInformation("User logged out.");
 
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ConfirmEmail(string userId, string code)
-        {
-            if (userId == null || code == null)
-            {
-                return RedirectToAction(nameof(HomeController.Index), "Home");
-            }
+        //[HttpGet]
+        //public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        //{
+        //    if (userId == null || code == null)
+        //    {
+        //        return RedirectToAction(nameof(HomeController.Index), "Home");
+        //    }
 
-            var user = await _userManager.FindByIdAsync(userId);
+        //    var user = await _userManager.FindByIdAsync(userId);
 
-            if (user == null)
-            {
-                throw new ApplicationException($"Unable to load user with ID '{userId}'.");
-            }
+        //    if (user == null)
+        //    {
+        //        throw new ApplicationException($"Unable to load user with ID '{userId}'.");
+        //    }
 
-            var result = await _userManager.ConfirmEmailAsync(user, code);
+        //    var result = await _userManager.ConfirmEmailAsync(user, code);
 
-            return View(result.Succeeded ? "ConfirmEmail" : "Error");
-        }
+        //    return View(result.Succeeded ? "ConfirmEmail" : "Error");
+        //}
 
         [HttpGet]
         public IActionResult ForgotPassword()
@@ -199,22 +199,19 @@ namespace SingleSignOn.WebTest.Controllers
             {
                 var user = await _userManager.FindByEmailAsync(model.Email);
 
-                if (user == null /*|| !(await _userManager.IsEmailConfirmedAsync(user))*/)
+                if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
                 {
-                    return RedirectToAction(nameof(ForgotPasswordConfirmation));
+                    ModelState.AddModelError(string.Empty, "User not found or email was not confirmed");
+                    return View();
                 }
-
-                var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var callbackUrl = Url.ResetPasswordCallbackLink(user.Id.ToString(), code, Request.Scheme);
-                await _accountService.SendForgotPasswordEmail(model, callbackUrl);
-
-                return RedirectToAction("ForgotPasswordConfirmation", "Account");
 
                 //var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 //var callbackUrl = Url.ResetPasswordCallbackLink(user.Id.ToString(), code, Request.Scheme);
-                //await _emailSender.SendEmailAsync(model.Email, "Reset Password",
-                //   $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>");
-                //return RedirectToAction(nameof(ForgotPasswordConfirmation));
+                //await _accountService.SendForgotPasswordEmail(model, callbackUrl);
+
+                var response = ApiProvider.PostSync<EmailViewModel, AccountResponseModel>("AccountApi/ForgotPassword", model);
+
+                return RedirectToAction("ForgotPasswordConfirmation", "Account");
             }
             return View(model);
         }

@@ -6,7 +6,7 @@ namespace SingleSignOn.ViewModels.Account
     public class UserInfoViewModel
     {
         public string Id { get; set; }
-        public string UserName { get; set; }
+        public string Email { get; set; }
         public string Token { get; set; }
 
         public UserInfoViewModel()
@@ -17,7 +17,7 @@ namespace SingleSignOn.ViewModels.Account
         public UserInfoViewModel(ApplicationUser applicationUser, string token = null)
         {
             Id = applicationUser.Id;
-            UserName = applicationUser.UserName;
+            Email = applicationUser.Email;
             Token = token;
         }
     }

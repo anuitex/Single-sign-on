@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SingleSignOn.BusinessLogic.Interfaces;
-using SingleSignOn.ViewModels.Account;
+using SingleSignOn.BusinessLogic.ResponseModels.Account;
 using SingleSignOn.DataAccess.Entities;
+using SingleSignOn.ViewModels.Account;
 using System;
 using System.Threading.Tasks;
-using SingleSignOn.BusinessLogic.ResponseModels.Account;
 
 namespace SingleSignOn.API.Controllers
 {
@@ -42,7 +42,7 @@ namespace SingleSignOn.API.Controllers
                 return Ok(incorrectUser);
             }
             var accountLoginResponse = await _accountService.Login(model, model.ReturnUrl);
-            
+
             return Ok(accountLoginResponse);
         }
 
@@ -67,12 +67,16 @@ namespace SingleSignOn.API.Controllers
 
                 if (existsUser != null)
                 {
-                    var incorrectUser = new AccountResponseModel() {IsOk = false, Error = "User exist" };
+                    var incorrectUser = new AccountResponseModel() { IsOk = false, Error = "User exist" };
                     return BadRequest(incorrectUser);
                 }
 
                 var result = await _accountService.Register(user, model.Password, model.ReturnUrl);
-                
+
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
+                await _accountService.SendConfirmRegisterEmail(new EmailViewModel() { Email = model.Email }, callbackUrl);
+
                 return Ok(result);
             }
             catch (Exception ex)
@@ -82,24 +86,27 @@ namespace SingleSignOn.API.Controllers
             }
         }
 
-        //[HttpPost]
-        //[Route("api/account/forgotPassword")]
-        //public async Task<IActionResult> ForgotPassword([FromBody]EmailViewModel model)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest("Invalid model!");
-        //    }
+        [HttpPost, Route("ForgotPassword")]
+        public async Task<IActionResult> ForgotPassword([FromBody]EmailViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Invalid model!");
+            }
 
-        //    var result = await _accountService.ForgotPassword(model, Url, Request);
+            ApplicationUser user = await _userManager.FindByEmailAsync(model.Email);
 
-        //    if (!result)
-        //    {
-        //        return BadRequest("User doesn't exist or isn't confirmed");
-        //    }
+            if (user==null)
+            {
+                return BadRequest(new AccountResponseModel() { IsOk = false, Error = "Cant find user with this email"});
+            }
 
-        //    return Ok();
-        //}
+            var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var callbackUrl = Url.ResetPasswordCallbackLink(user.Id.ToString(), code, Request.Scheme);
+            await _accountService.SendForgotPasswordEmail(model, callbackUrl);
+            
+            return Ok();
+        }
 
         //[HttpGet]
         //[Route("google-token/{token}")]
