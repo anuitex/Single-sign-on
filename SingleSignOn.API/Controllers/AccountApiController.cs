@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Primitives;
 using SingleSignOn.BusinessLogic.Interfaces;
 using SingleSignOn.BusinessLogic.ResponseModels.Account;
 using SingleSignOn.DataAccess.Entities;
 using SingleSignOn.ViewModels.Account;
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace SingleSignOn.API.Controllers
@@ -47,7 +47,6 @@ namespace SingleSignOn.API.Controllers
             return Ok(accountLoginResponse);
         }
 
-
         [HttpPost, Route("Register")]
         public async Task<IActionResult> Register([FromBody]RegisterAccountViewModel model)
         {
@@ -86,7 +85,47 @@ namespace SingleSignOn.API.Controllers
                 return BadRequest(incorrectUser);
             }
         }
-        
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ExternalLogin(string provider, string returnUrl = null)
+        {
+            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "AccountApi", new { returnUrl });
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            return Challenge(properties, provider);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+        {
+            if (remoteError != null)
+            {
+                var remoteErrorResult = new AccountResponseModel() { IsOk = false, Error = "External service error" };
+                return BadRequest(remoteErrorResult); //=-=--=-=-=-=-=(login)
+            }
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+
+            if (info == null)
+            {
+                var externalSignInResult = new AccountResponseModel() { IsOk = false, Error = "External login error" };
+                return BadRequest(externalSignInResult);//=-=-=-=-=-=-=-=(login)
+            }
+
+            Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+            if (result.Succeeded)
+            {
+                ApplicationUser user = await _userManager.GetUserAsync(HttpContext.User);
+                string token = _accountService.GenerateJwtToken(user.Email, user);
+                var userInfo = new UserInfoViewModel(user, token);
+                var succeededResult = new AccountResponseModel() { IsOk = true, UserInfo = userInfo };
+
+                return Ok(succeededResult); //-==-=-=-=-=-=-=-(returnurl)
+            }
+
+            var somethingWentWrongResult = new AccountResponseModel() { IsOk = false, Error = "Something went wrong" };
+            return BadRequest(somethingWentWrongResult);
+        }
+
         //[HttpGet]
         //[Route("google-token/{token}")]
         //public async Task<IActionResult> GoogleToken(string token)

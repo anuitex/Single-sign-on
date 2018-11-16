@@ -270,11 +270,12 @@ namespace SingleSignOn.WebTest.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult ExternalLogin(string provider, string returnUrl = null)
+        public Task ExternalLogin(string provider, string returnUrl = null)
         {
-            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            return Challenge(properties, provider);
+            var model = new ExternalLoginViewModel() {Provider = provider, ReturnUrl = returnUrl };
+            AccountResponseModel responseUser = ApiProvider.PostSync<ExternalLoginViewModel, AccountResponseModel>("AccountApi/ExternalLogin", model);
+
+            return null;
         }
 
         [HttpGet]
@@ -306,13 +307,13 @@ namespace SingleSignOn.WebTest.Controllers
                 ViewData["ReturnUrl"] = returnUrl;
                 ViewData["LoginProvider"] = info.LoginProvider;
                 var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-                return View("ExternalLogin", new ExternalLoginViewModel { Email = email });
+                return View("ExternalLogin", email );
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginViewModel model, string returnUrl = null)
+        public async Task<IActionResult> ExternalLoginConfirmation(string email, string returnUrl = null)
         {
             if (ModelState.IsValid)
             {
@@ -321,14 +322,14 @@ namespace SingleSignOn.WebTest.Controllers
                 {
                     throw new ApplicationException("Error loading external login information during confirmation.");
                 }
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var user = new ApplicationUser { UserName = email, Email = email };
 
                 Random rnd = new Random();
                 var password = Membership.GeneratePassword(12, 2) + rnd.Next(0, 99).ToString();
 
                 AccountService _accountService = new AccountService(_configuration, _userManager);
 
-                var existsUser = await _accountService.FindByName(model.Email);
+                var existsUser = await _accountService.FindByName(email);
 
                 if (existsUser != null)
                 {
@@ -350,12 +351,12 @@ namespace SingleSignOn.WebTest.Controllers
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, ex.Message);
-                    return View(nameof(ExternalLogin), model);
+                    return View(nameof(ExternalLogin), email);
                 }
             }
 
             ViewData["ReturnUrl"] = returnUrl;
-            return View(nameof(ExternalLogin), model);
+            return View(nameof(ExternalLogin), email);
         }
 
         //[HttpGet]

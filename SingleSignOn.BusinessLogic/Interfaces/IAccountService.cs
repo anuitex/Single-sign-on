@@ -14,5 +14,6 @@ namespace SingleSignOn.BusinessLogic.Interfaces
         Task SendForgotPasswordEmail(EmailViewModel model, string callbackUrl);
         Task<AccountResponseModel> Login(LoginAccountViewModel model, string hostNameString);
         Task SendConfirmRegisterEmail(EmailViewModel email, string callBackUrl);
+        string GenerateJwtToken(string email, ApplicationUser user);
     }
 }

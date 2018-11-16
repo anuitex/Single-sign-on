@@ -70,8 +70,14 @@ namespace SingleSignOn.API
                 options.AccessDeniedPath = new PathString("/Account/Login/");
                 options.LoginPath = new PathString("/Account/Login/");
                 //options.LoginPath = new PathString("/Areas/Account/Controllers/Account/Login/");
-
             });
+
+            services.AddAuthentication().AddGoogle(googleOptions =>
+            {
+                googleOptions.ClientId = "603900993327-fc5df5mb9vt2vka5i3e95f4gir2qc87g.apps.googleusercontent.com";
+                googleOptions.ClientSecret = "j_qZsLntmtUL1R7q2ch3SLZl";
+            });
+            
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(o =>
             {

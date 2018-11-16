@@ -45,8 +45,8 @@ namespace SingleSignOn.WebTest
 
             services.AddAuthentication().AddGoogle(googleOptions =>
             {
-                googleOptions.ClientId = "298569871907-einlhmd6j2uvp4reh8k0o1b0e2evitso.apps.googleusercontent.com";
-                googleOptions.ClientSecret = "YPJHD6kv7RXSco9ga48nu-JK";
+                googleOptions.ClientId = "603900993327-fc5df5mb9vt2vka5i3e95f4gir2qc87g.apps.googleusercontent.com";
+                googleOptions.ClientSecret = "j_qZsLntmtUL1R7q2ch3SLZl";
             });
            
             //services.AddTransient<IEmailSender, EmailSender>();

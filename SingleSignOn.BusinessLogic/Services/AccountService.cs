@@ -167,7 +167,7 @@ namespace SingleSignOn.BusinessLogic.Services
             await _emailProvider.SendMessage(emailCredential, emailConfig.Subject, emailConfig.ConfirmAccountBodyStart + callbackUrl + emailConfig.ConfirmRegisterBodyEnd, model.Email);
         }
 
-        private string GenerateJwtToken(string email, ApplicationUser user)
+        public string GenerateJwtToken(string email, ApplicationUser user)
         {
             var claims = new List<Claim>
             {
