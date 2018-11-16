@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
 using SingleSignOn.BusinessLogic.Interfaces;
 using SingleSignOn.BusinessLogic.ResponseModels.Account;
 using SingleSignOn.DataAccess.Entities;
@@ -85,29 +86,7 @@ namespace SingleSignOn.API.Controllers
                 return BadRequest(incorrectUser);
             }
         }
-
-        [HttpPost, Route("ForgotPassword")]
-        public async Task<IActionResult> ForgotPassword([FromBody]EmailViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest("Invalid model!");
-            }
-
-            ApplicationUser user = await _userManager.FindByEmailAsync(model.Email);
-
-            if (user==null)
-            {
-                return BadRequest(new AccountResponseModel() { IsOk = false, Error = "Cant find user with this email"});
-            }
-
-            var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var callbackUrl = Url.ResetPasswordCallbackLink(user.Id.ToString(), code, Request.Scheme);
-            await _accountService.SendForgotPasswordEmail(model, callbackUrl);
-            
-            return Ok();
-        }
-
+        
         //[HttpGet]
         //[Route("google-token/{token}")]
         //public async Task<IActionResult> GoogleToken(string token)

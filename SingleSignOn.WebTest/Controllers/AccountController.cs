@@ -1,19 +1,19 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SingleSignOn.BusinessLogic.Interfaces;
 using SingleSignOn.BusinessLogic.ResponseModels.Account;
 using SingleSignOn.BusinessLogic.Services;
-using SingleSignOn.ViewModels.Account;
 using SingleSignOn.DataAccess.Entities;
 using SingleSignOn.DataAccess.Providers;
+using SingleSignOn.ViewModels.Account;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web.Security;
-using Microsoft.AspNetCore.Authentication;
 
 namespace SingleSignOn.WebTest.Controllers
 {
@@ -63,7 +63,7 @@ namespace SingleSignOn.WebTest.Controllers
             if (ModelState.IsValid)
             {
                 AccountResponseModel apiResponse = ApiProvider.PostSync<LoginViewModel, AccountResponseModel>("AccountApi/Login", model);
-                
+
                 var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
                 if (apiResponse.IsOk)
@@ -130,7 +130,7 @@ namespace SingleSignOn.WebTest.Controllers
                         return RedirectToAction("Index", "Home", new { area = "Home" });
                     }
 
-                    var newUser = new ApplicationUser() { Email = responseUser.UserInfo.Email};
+                    var newUser = new ApplicationUser() { Email = responseUser.UserInfo.Email };
                     await _signInManager.SignInAsync(newUser, isPersistent: false);
                 }
             }
@@ -152,26 +152,6 @@ namespace SingleSignOn.WebTest.Controllers
 
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
-
-        //[HttpGet]
-        //public async Task<IActionResult> ConfirmEmail(string userId, string code)
-        //{
-        //    if (userId == null || code == null)
-        //    {
-        //        return RedirectToAction(nameof(HomeController.Index), "Home");
-        //    }
-
-        //    var user = await _userManager.FindByIdAsync(userId);
-
-        //    if (user == null)
-        //    {
-        //        throw new ApplicationException($"Unable to load user with ID '{userId}'.");
-        //    }
-
-        //    var result = await _userManager.ConfirmEmailAsync(user, code);
-
-        //    return View(result.Succeeded ? "ConfirmEmail" : "Error");
-        //}
 
         [HttpGet]
         public IActionResult ForgotPassword()
@@ -205,11 +185,9 @@ namespace SingleSignOn.WebTest.Controllers
                     return View();
                 }
 
-                //var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                //var callbackUrl = Url.ResetPasswordCallbackLink(user.Id.ToString(), code, Request.Scheme);
-                //await _accountService.SendForgotPasswordEmail(model, callbackUrl);
-
-                var response = ApiProvider.PostSync<EmailViewModel, AccountResponseModel>("AccountApi/ForgotPassword", model);
+                var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var callbackUrl = Url.ResetPasswordCallbackLink(user.Id.ToString(), code, Request.Scheme);
+                await _accountService.SendForgotPasswordEmail(model, callbackUrl);
 
                 return RedirectToAction("ForgotPasswordConfirmation", "Account");
             }
@@ -262,8 +240,7 @@ namespace SingleSignOn.WebTest.Controllers
 
             return View();
         }
-
-
+        
         private void AddErrors(IdentityResult result)
         {
             foreach (var error in result.Errors)
@@ -375,7 +352,6 @@ namespace SingleSignOn.WebTest.Controllers
                     _logger.LogError(ex, ex.Message);
                     return View(nameof(ExternalLogin), model);
                 }
-
             }
 
             ViewData["ReturnUrl"] = returnUrl;
